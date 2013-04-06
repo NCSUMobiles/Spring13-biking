@@ -39,5 +39,10 @@
     <string name="title_activity_sign_up">SignUp</string>
     <string name="nlogin">Login</string>
     <string name="nlogout">Logout</string>
+    <string name="title_activity_show_route">ShowRoute</string>
+    <string name="title_activity_view_route">ViewRoute</string>
+    <string name="drawer_handle_desc">Drawer Handle</string> 
+    <string name="heading_starttime">Start time: </string>
+    <string name="heading_endtime">End time: </string> 
 
 </resources>

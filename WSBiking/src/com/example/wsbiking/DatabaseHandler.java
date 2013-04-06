@@ -258,4 +258,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 		return allRoutes;
 	}
+	public Cursor getRoutePoints(Integer routeID) {
+		
+		    Cursor cursor = null;
+		
+		    try {
+		
+		      SQLiteDatabase db = this.getWritableDatabase();
+		
+		      cursor = db.query(TABLE_ROUTE_POINTS, new String[] { LATITUDE,
+		          LONGITUDE }, ROUTEID + "= ?",
+		          new String[] { String.valueOf(routeID) }, null, null, null);
+		
+		    } catch (Exception ex) {
+		      Log.e(LOG_TAG,
+		          "Failed to get all route points from points table table: "
+		              + ex.getMessage());
+		    }
+		
+		    return cursor;
+		  } 
 }
