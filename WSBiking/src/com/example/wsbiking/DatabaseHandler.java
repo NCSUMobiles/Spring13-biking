@@ -45,8 +45,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	private static final String DESCRIPTION = "description";
 	private static final String AVGSPEED = "speed";
 	private static final String DISTANCE = "distance";
-	private static final String STARTTIME = "startTime";
-	private static final String ENDTIME = "endTime";
+	private static final String DURATION = "duration";
 
 	// Routes Table Column indexes
 	private static final Integer ROUTEIDINDEX = 0;
@@ -54,8 +53,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	private static final Integer DESCRIPTIONINDEX = 2;
 	private static final Integer AVGSPEEDINDEX = 3;
 	private static final Integer DISTANCEINDEX = 4;
-	private static final Integer STARTTIMEINDEX = 5;
-	private static final Integer ENDTIMEINDEX = 6;
+	private static final Integer DURATIONINDEX = 5;
 
 	// Route points Table Columns names
 	private static final String LATITUDE = "latitude";
@@ -105,8 +103,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		String CREATE_ROUTE_TABLE = "CREATE TABLE " + TABLE_ROUTES + "("
 				+ ROUTEID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME
 				+ " TEXT," + DESCRIPTION + " TEXT," + AVGSPEED + " REAL,"
-				+ DISTANCE + " REAL," + STARTTIME + " TEXT," + ENDTIME
-				+ " TEXT); ";
+				+ DISTANCE + " REAL," + DURATION + " REAL" + "); ";
 
 		String CREATE_ROUTE_POINTS_TABLE = "CREATE TABLE " + TABLE_ROUTE_POINTS
 				+ "(" + ROUTEID + " INTEGER," + LATITUDE + " REAL," + LONGITUDE
@@ -138,33 +135,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	/**
-	 * Delete route if failure to insert route points
-	 * 
-	 * @param rowID
-	 */
-	public void deleteRoute(Integer rowID) {
-		try {
-			SQLiteDatabase db = this.getWritableDatabase();
-
-			if (db.delete(TABLE_ROUTES, ROUTEID + "=?",
-					new String[] { String.valueOf(rowID) }) == 0)
-				throw new Exception("Failed to delete Route entry");
-
-		} catch (Exception ex) {
-			Log.e(LOG_TAG,
-					"Failed to delete route (Phantom route without route points): "
-							+ ex.getMessage());
-		}
-	}
-
 	// Create a new route entry
 	// TODO Null handling to be done while calling
-	public Integer addRoute(ArrayList<RoutePoint> routePoints, String name,
-			String description, float distance, float avgSpeed,
-			String startTime, String endTime) {
+	public boolean addRoute(ArrayList<RoutePoint> routePoints, String name,
+			String description, float distance, float duration, float avgSpeed) {
 
-		Integer insertedRowID = 0;
+		long insertedRowID;
+		boolean result = false;
 
 		try {
 
@@ -174,26 +151,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			values.put(NAME, name);
 			values.put(DESCRIPTION, description);
 			values.put(DISTANCE, distance);
+			values.put(DURATION, duration);
 			values.put(AVGSPEED, avgSpeed);
-			values.put(STARTTIME, startTime);
-			values.put(ENDTIME, endTime);
 
 			// Inserting Row
-			insertedRowID = (int) db.insert(TABLE_ROUTES, null, values);
+			insertedRowID = db.insert(TABLE_ROUTES, null, values);
 
 			if (insertedRowID == -1)
 				throw new Exception("Failed to insert Route entry");
 
-			if (!insertRoutePoints(routePoints, insertedRowID)) {
-				deleteRoute(insertedRowID);
-				insertedRowID = -1;
-			}
+			if (insertRoutePoints(routePoints, insertedRowID))
+				result = true;
 
 		} catch (Exception ex) {
 			Log.e(LOG_TAG, "Failed to insert route values: " + ex.getMessage());
 		}
 
-		return insertedRowID;
+		return result;
 	}
 
 	private boolean insertRoutePoints(ArrayList<RoutePoint> routePoints,
@@ -226,7 +200,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 			db.setTransactionSuccessful();
 			result = true;
-
 		} catch (Exception ex) {
 			Log.e(LOG_TAG, "Failed to insert route points: " + ex.getMessage());
 		} finally {
@@ -251,36 +224,32 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			SQLiteDatabase db = this.getWritableDatabase();
 
 			cursor = db.query(TABLE_ROUTES, new String[] { ROUTEID, NAME,
-					DESCRIPTION, AVGSPEED, DISTANCE, STARTTIME, ENDTIME },
-					null, null, null, null, null);
+					DESCRIPTION, AVGSPEED, DURATION, DISTANCE }, null, null,
+					null, null, null);
 
-			if (cursor.moveToLast()) {
-
+			if (cursor.moveToFirst()) {
 				allRoutes = new ArrayList<Route>();
 				Integer routeID;
-				String routeName, routeDesc, routeStart, routeEnd;
-				;
-				float routeSpeed, routeDistance;
-
-				while (!cursor.isBeforeFirst()) {
-
+				String routeName, routeDesc;
+				float routeSpeed, routeDuration, routeDistance;
+				
+				while (!cursor.isAfterLast()) {
+					
 					routeID = cursor.getInt(ROUTEIDINDEX);
 					routeName = cursor.getString(NAMEINDEX);
 					routeDesc = cursor.getString(DESCRIPTIONINDEX);
 					routeSpeed = cursor.getInt(AVGSPEEDINDEX);
+					routeDuration = cursor.getInt(DURATIONINDEX);
 					routeDistance = cursor.getInt(DISTANCEINDEX);
-					routeStart = cursor.getString(STARTTIMEINDEX);
-					routeEnd = cursor.getString(ENDTIMEINDEX);
-
-					allRoutes.add(new Route(routeID, routeName, routeDesc,
-							routeSpeed, routeDistance, routeStart, routeEnd));
-
-					cursor.moveToPrevious();
+					
+					allRoutes.add(new Route(routeID, routeName, routeDesc, routeSpeed, routeDuration, routeDistance));
+					
+					cursor.moveToNext();
 				}
 			}
 
 			cursor.close();
-
+			
 		} catch (Exception ex) {
 			Log.e(LOG_TAG,
 					"Failed to get all routes from route table: "
@@ -288,26 +257,5 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		}
 
 		return allRoutes;
-	}
-
-	public Cursor getRoutePoints(Integer routeID) {
-
-		Cursor cursor = null;
-
-		try {
-
-			SQLiteDatabase db = this.getWritableDatabase();
-
-			cursor = db.query(TABLE_ROUTE_POINTS, new String[] { LATITUDE,
-					LONGITUDE }, ROUTEID + "= ?",
-					new String[] { String.valueOf(routeID) }, null, null, null);
-
-		} catch (Exception ex) {
-			Log.e(LOG_TAG,
-					"Failed to get all route points from points table table: "
-							+ ex.getMessage());
-		}
-
-		return cursor;
 	}
 }

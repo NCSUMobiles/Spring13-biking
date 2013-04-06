@@ -1,24 +1,27 @@
 package com.example.wsbiking;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.FragmentActivity;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphUser;
 
 /**
  * TODO: Improve code structure(Remove redundancy, error checking, try catch,
@@ -55,7 +62,6 @@ public class RecordActivity extends FragmentActivity {
 	private static final float METER_THRESHOLD = 160.934f;
 	private static final float METERS_TO_MILES = 1609.34f;
 	private static final CharSequence INITIAL_DISTANCE = "0 meters";
-	private static final float ROUTEWIDTH = 10.0f;
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -65,6 +71,8 @@ public class RecordActivity extends FragmentActivity {
 
 	private UiSettings mapUI;
 	private Marker myLocationMarker;
+	private Marker startMarker;
+	private Marker endMarker;
 
 	private LocationManager locManager;
 	private LocationListener locationListener;
@@ -77,10 +85,12 @@ public class RecordActivity extends FragmentActivity {
 	// Variables to keep track of current route recording
 	private float totalDistance;
 	private Location lastLocation;
-	private Date startTime;
 
 	private DatabaseHandler dbHandler;
 	private Resources resourceHandler;
+	
+	private Session session;
+	private EditText fbUserId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +99,9 @@ public class RecordActivity extends FragmentActivity {
 		setUpMapIfNeeded();
 		dbHandler = DatabaseHandler.getInstance(this);
 		resourceHandler = getResources();
+		fbUserId = (EditText) findViewById(R.id.fbUserId);
+		session = Session.getActiveSession();
+		setName(session);
 	}
 
 	@Override
@@ -166,9 +179,8 @@ public class RecordActivity extends FragmentActivity {
 
 		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-		// TODO: sometimes comes as null, need to handle
-		Location lastKnown = locManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		Location lastKnown = locManager.getLastKnownLocation(locManager
+				.getBestProvider(new Criteria(), false));
 
 		if (lastKnown != null)
 			moveCamera(lastKnown, DEFAULTZOOM);
@@ -201,13 +213,12 @@ public class RecordActivity extends FragmentActivity {
 		}
 
 		if (!gps_enabled) {
-			//TODO: Check GPS status all over app 
-			// AlertDialog.Builder builder = new Builder(this);
-			// builder.setTitle(resourceHandler
-			// .getString(R.string.title_GPSdisabled));
-			// builder.setMessage(resourceHandler
-			// .getString(R.string.message_GPSdisabled));
-			// builder.create().show();
+			AlertDialog.Builder builder = new Builder(this);
+			builder.setTitle(resourceHandler
+					.getString(R.string.title_GPSdisabled));
+			builder.setMessage(resourceHandler
+					.getString(R.string.message_GPSdisabled));
+			builder.create().show();
 		}
 	}
 
@@ -229,11 +240,11 @@ public class RecordActivity extends FragmentActivity {
 								currentLocation.getLongitude()));
 
 				rectOptions.color(Color.BLUE);
-				rectOptions.width(ROUTEWIDTH);
+				rectOptions.width((float) 1.0);
 
 				mMap.addPolyline(rectOptions);
 			} else {
-				mMap.addMarker(new MarkerOptions().position(
+				startMarker = mMap.addMarker(new MarkerOptions().position(
 						new LatLng(currentLocation.getLatitude(),
 								currentLocation.getLongitude())).icon(
 						BitmapDescriptorFactory
@@ -256,23 +267,7 @@ public class RecordActivity extends FragmentActivity {
 	}
 
 	/**
-	 * Converts the meters distance into miles
-	 * 
-	 * @return
-	 */
-	private float convertDistanceToMiles() {
-		float tempDistance = totalDistance, calculatedDistance;
-		calculatedDistance = (float) Math.floor(tempDistance / METERS_TO_MILES);
-		tempDistance %= METERS_TO_MILES;
-		calculatedDistance += tempDistance / METERS_TO_MILES;
-		calculatedDistance = Float.parseFloat(new DecimalFormat("#.##")
-				.format(calculatedDistance));
-
-		return calculatedDistance;
-	}
-
-	/**
-	 * Format distance in decimal meters to rounded meters or miles *
+	 * Format distance in decimal meters to rounded meters or miles
 	 * 
 	 * @return
 	 */
@@ -280,7 +275,14 @@ public class RecordActivity extends FragmentActivity {
 		if (totalDistance <= METER_THRESHOLD) {
 			return String.valueOf(Math.round(totalDistance) + " meters");
 		} else {
-			return String.valueOf(convertDistanceToMiles() + " miles");
+			float tempDistance = totalDistance, calculatedDistance;
+			calculatedDistance = (float) Math.floor(tempDistance
+					/ METERS_TO_MILES);
+			tempDistance %= METERS_TO_MILES;
+			calculatedDistance += tempDistance / METERS_TO_MILES;
+			calculatedDistance = Float.parseFloat(new DecimalFormat("#.##")
+					.format(calculatedDistance));
+			return String.valueOf(calculatedDistance + " miles");
 		}
 	}
 
@@ -302,12 +304,11 @@ public class RecordActivity extends FragmentActivity {
 			mapUI.setCompassEnabled(false);
 
 			mMap.clear();
-
-			startTime = new Date();
+			startMarker = endMarker = null;
 
 			// Get last known location and move camera
-			Location lastKnown = locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			Location lastKnown = locManager.getLastKnownLocation(locManager
+					.getBestProvider(new Criteria(), false));
 
 			if (lastKnown != null) {
 
@@ -319,14 +320,12 @@ public class RecordActivity extends FragmentActivity {
 						BitmapDescriptorFactory
 								.fromResource(R.drawable.mylocation)));
 
-				mMap.addMarker(new MarkerOptions().position(lastKnownLatLng)
-						.icon(BitmapDescriptorFactory
+				startMarker = mMap.addMarker(new MarkerOptions().position(
+						lastKnownLatLng).icon(
+						BitmapDescriptorFactory
 								.fromResource(R.drawable.cycling)));
 
 				lastLocation = new Location(lastKnown);
-				
-				routePoints.add(new RoutePoint(lastLocation.getLatitude(),
-						lastLocation.getLongitude()));
 
 				moveCamera(lastKnown, DEFAULTZOOM);
 			} else {
@@ -391,25 +390,21 @@ public class RecordActivity extends FragmentActivity {
 
 		} else {
 
-			Date endTime = new Date();
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(
-					"yyyy-MM-dd HH:mm:ss");
+			endMarker = mMap.addMarker(new MarkerOptions().position(
+					new LatLng(lastLocation.getLatitude(), lastLocation
+							.getLongitude())).icon(
+					BitmapDescriptorFactory.fromResource(R.drawable.finish)));
 
-			mMap.addMarker(new MarkerOptions()
-					.position(
-							new LatLng(lastLocation.getLatitude(), lastLocation
-									.getLongitude()))
-					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.finish))
-					.title(dateFormatter.format(endTime)));
+			// Convert in terms of minutes
+			float elapsedTime = (float) (SystemClock.elapsedRealtime() - timer
+					.getBase()) / (float) (1000 * 60);
 
 			Intent intent = new Intent(this, RouteSave.class);
 			intent.putParcelableArrayListExtra("routePoints", routePoints);
-			intent.putExtra("totalDistance", convertDistanceToMiles());
-			intent.putExtra("startTime", dateFormatter.format(startTime));
-			intent.putExtra("endTime", dateFormatter.format(endTime));
-			intent.putExtra("avgSpeed", calculateSpeed(endTime));
-
+			intent.putExtra("totalDistance", totalDistance);
+			intent.putExtra("elapsedTime", elapsedTime);
+			intent.putExtra("avgSpeed",
+					calculateSpeed(totalDistance, elapsedTime));
 			startActivity(intent);
 		}
 
@@ -423,18 +418,21 @@ public class RecordActivity extends FragmentActivity {
 	}
 
 	/**
-	 * Returns average speed in terms of miler per hour
+	 * Calculate speed from distance and time
 	 * 
-	 * @param endTime
+	 * @param distance
+	 * @param duration
 	 * @return
 	 */
-	private float calculateSpeed(Date endTime) {
+	private float calculateSpeed(float distance, float duration) {
+		// TODO Implement a full proof method to calculate average speed from
+		// distance and time
 
-		float distanceInMiles = convertDistanceToMiles();
-		long difference = endTime.getTime() - startTime.getTime();
-		float timeInHours = (float) difference / (float) (1000 * 60 * 60);
+		float hours = duration / 60;
+		duration = duration % 60;
+		hours += duration / 60 * 100;
 
-		return distanceInMiles / timeInHours;
+		return distance / hours;
 	}
 
 	/**
@@ -452,4 +450,28 @@ public class RecordActivity extends FragmentActivity {
 
 		mMap.animateCamera(cameraUpdate);
 	}
+	
+	private void setName(final Session session) {
+	    // Make an API call to get user data and define a 
+	    // new callback to handle the response.
+	    Request request = Request.newMeRequest(session, 
+	            new Request.GraphUserCallback() {
+	    		@Override
+	    		public void onCompleted(GraphUser user, Response response) {
+	            // If the response is successful
+	            if (session == Session.getActiveSession()) {
+	                if (user != null) {
+
+	                    Log.i("pratik", "username "+user.getId()+user.getFirstName() + " " + user.getLastName());
+	                    fbUserId.setText(user.getId());
+	                }
+	            }
+	            if (response.getError() != null) {
+	                // Handle errors, will do so later.
+	            }
+	        }
+
+	    });
+	    request.executeAsync();
+	} 
 }

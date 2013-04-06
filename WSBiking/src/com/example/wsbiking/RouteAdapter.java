@@ -45,10 +45,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 			holder.txtVwSpeed = (TextView) row.findViewById(R.id.txtVwSpeed);
 			holder.txtVwDistance = (TextView) row
 					.findViewById(R.id.txtVwDistance);
-			holder.txtVwStartTime = (TextView) row
-					.findViewById(R.id.txtVwStartTime);
-			holder.txtVwEndTime = (TextView) row
-					.findViewById(R.id.txtVwEndTime);
+			holder.txtVwTime = (TextView) row.findViewById(R.id.txtVwTime);
 
 			row.setTag(holder);
 		} else {
@@ -56,14 +53,13 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 		}
 
 		Route route = routes.get(position);
-
+		
 		holder.txtVwRouteTitle.setText(route.getTitle());
 		holder.TxtVwRouteDesc.setText(route.getDescription());
 		holder.txtVwRouteID.setText(String.valueOf(route.getID()));
 		holder.txtVwSpeed.setText(String.valueOf(route.getSpeed()));
 		holder.txtVwDistance.setText(String.valueOf(route.getDistance()));
-		holder.txtVwStartTime.setText(String.valueOf(route.getStartTime()));
-		holder.txtVwEndTime.setText(String.valueOf(route.getEndTime()));
+		holder.txtVwTime.setText(String.valueOf(route.getDuration()));
 
 		return row;
 	}
@@ -75,7 +71,6 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 		ImageView imgBtnShowMap;
 		TextView txtVwSpeed;
 		TextView txtVwDistance;
-		TextView txtVwStartTime;
-		TextView txtVwEndTime;
+		TextView txtVwTime;
 	}
 }

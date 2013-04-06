@@ -25,13 +25,19 @@
     <string name="message_GPSdisabled">Sorry, location cannot be determined. Please enable GPS</string>
     <string name="message_single_route_point">Need more than one point to save route</string>
     <string name="title_activity_view_routes">ViewRoutes</string>
-    <string name="heading_speed">Average Speed: </string>
-    <string name="heading_distance">Distance Travelled: </string>
-    <string name="heading_starttime">Start time: </string>
-    <string name="heading_endtime">End time: </string>
+    <string name="heading_speed">Speed: </string>
+    <string name="heading_duration">Duration: </string>
+    <string name="heading_distance">Distance: </string>
     <string name="show_on_map_image">Click to show on map </string>
-    <string name="title_activity_show_route">ShowRoute</string>
-    <string name="title_activity_view_route">ViewRoute</string>
-    <string name="drawer_handle_desc">Drawer Handle</string>
+    <string name="app_id">497834950264732</string>
+    <string name="title_activity_main">Main</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_normal_login">NormalLogin</string>
+    <string name="title_activity_sign_up">SignUp</string>
+    <string name="login">Facebook Login</string>
+    <string name="logout">Logout from Facebook</string>
+    <string name="title_activity_sign_up">SignUp</string>
+    <string name="nlogin">Login</string>
+    <string name="nlogout">Logout</string>
 
 </resources>

@@ -4,13 +4,19 @@ import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class ViewRoutes extends Activity {
+
+	private static final String ROUTEID = "routeID";
+	private static final String AVGSPEED = "speed";
+	private static final String DISTANCE = "distance";
+	private static final String NAME = "name";
+	private static final String DESCRIPTION = "description";
+	private static final String DURATION = "duration";
 
 	private DatabaseHandler dbHandler;
 
@@ -36,7 +42,7 @@ public class ViewRoutes extends Activity {
 				routesListView.setAdapter(adapter);
 			}
 		} catch (Exception ex) {
-
+//			Log.e("Route List Error", ex.getMessage());
 		}
 	}
 
@@ -47,29 +53,4 @@ public class ViewRoutes extends Activity {
 		return true;
 	}
 
-	public void showRouteOnMap(View showButton) {
-		TextView txtVwRouteID;
-		TextView txtVwSpeed;
-		TextView txtVwDistance;
-		TextView txtVwStartTime;
-		TextView txtVwEndTime;
-
-		View rowContainer = (View) showButton.getParent().getParent();
-
-		txtVwRouteID = (TextView) rowContainer.findViewById(R.id.txtVwRouteID);
-		txtVwSpeed = (TextView) rowContainer.findViewById(R.id.txtVwSpeed);
-		txtVwDistance = (TextView) rowContainer
-				.findViewById(R.id.txtVwDistance);
-		txtVwStartTime = (TextView) rowContainer.findViewById(R.id.txtVwStartTime);
-		txtVwEndTime = (TextView) rowContainer.findViewById(R.id.txtVwEndTime);
-
-		Intent intent = new Intent(this, ViewRoute.class);
-		intent.putExtra("routeID", txtVwRouteID.getText());
-		intent.putExtra("totalDistance", txtVwDistance.getText());
-		intent.putExtra("avgSpeed", txtVwSpeed.getText());
-		intent.putExtra("startTime", txtVwStartTime.getText());
-		intent.putExtra("endTime", txtVwEndTime.getText());
-		
-		startActivity(intent);
-	}
 }

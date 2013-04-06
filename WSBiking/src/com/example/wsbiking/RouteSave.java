@@ -23,8 +23,7 @@ import android.widget.Toast;
  */
 public class RouteSave extends Activity {
 	private ArrayList<RoutePoint> routePoints;
-	private float totalDistance, avgSpeed;
-	private String startTime, endtime;
+	private float totalDistance, elapsedTime, avgSpeed;
 	private DatabaseHandler dbHandler = null;
 
 	@Override
@@ -47,9 +46,8 @@ public class RouteSave extends Activity {
 		this.routePoints = recordActivity.getExtras().getParcelableArrayList(
 				"routePoints");
 		this.totalDistance = recordActivity.getFloatExtra("totalDistance", 0);
+		this.elapsedTime = recordActivity.getFloatExtra("elapsedTime", 0);
 		this.avgSpeed = recordActivity.getFloatExtra("avgSpeed", 0);
-		this.startTime = recordActivity.getStringExtra("startTime");
-		this.endtime = recordActivity.getStringExtra("endTime");
 
 		Button btnSave = (Button) findViewById(R.id.btnSave);
 		btnSave.setEnabled(false);
@@ -106,7 +104,7 @@ public class RouteSave extends Activity {
 		String routeDesc = edtDesc.getText().toString();
 
 		if (dbHandler.addRoute(this.routePoints, routeTitle, routeDesc,
-				this.totalDistance, this.avgSpeed, this.startTime, this.endtime) > 0) {
+				this.totalDistance, this.elapsedTime, this.avgSpeed)) {
 
 			Toast toast = Toast.makeText(getApplicationContext(),
 					"Route Saved", Toast.LENGTH_SHORT);
@@ -115,7 +113,7 @@ public class RouteSave extends Activity {
 			toast.show();
 		} else {
 			Toast toast = Toast.makeText(getApplicationContext(),
-					"Route couldn't be saved", Toast.LENGTH_SHORT);
+					"Route Discarded", Toast.LENGTH_SHORT);
 
 			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
 			toast.show();
