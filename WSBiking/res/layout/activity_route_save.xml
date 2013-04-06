@@ -47,6 +47,7 @@
         android:ems="10"
         android:gravity="left"
         android:hint="@string/route_title_hint"
+        android:maxLength="30"
         android:maxLines="1"
         android:scrollHorizontally="true"
         android:scrollbarStyle="insideOverlay"
