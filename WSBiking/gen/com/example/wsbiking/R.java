@@ -139,46 +139,65 @@ containing a value of this type.
         public static final int activity_vertical_margin=0x7f060001;
     }
     public static final class drawable {
-        public static final int cycling=0x7f020000;
-        public static final int finish=0x7f020001;
-        public static final int ic_launcher=0x7f020002;
-        public static final int mylocation=0x7f020003;
-        public static final int showonmap=0x7f020004;
-        public static final int start_button=0x7f020005;
-        public static final int stop_button=0x7f020006;
-        public static final int whiteroundedbackground=0x7f020007;
-        public static final int wsbike=0x7f020008;
+        public static final int _cycling=0x7f020000;
+        public static final int _finish=0x7f020001;
+        public static final int curved_dark_bg=0x7f020002;
+        public static final int cycling=0x7f020003;
+        public static final int drawer_handle=0x7f020004;
+        public static final int finish=0x7f020005;
+        public static final int ic_launcher=0x7f020006;
+        public static final int mylocation=0x7f020007;
+        public static final int show_on_map=0x7f020008;
+        public static final int showonmap=0x7f020009;
+        public static final int showonmap_pressed=0x7f02000a;
+        public static final int start_button=0x7f02000b;
+        public static final int stop_button=0x7f02000c;
+        public static final int top_curved_dark_bg=0x7f02000d;
+        public static final int wsbike=0x7f02000e;
     }
     public static final class id {
         public static final int LinearLayout1=0x7f04000a;
         public static final int RelativeLayout1=0x7f040013;
-        public static final int TxtVwRouteDesc=0x7f040016;
-        public static final int action_routes=0x7f04001c;
-        public static final int action_settings=0x7f04001d;
+        public static final int SlidingDrawer=0x7f040014;
+        public static final int TxtVwRouteDesc=0x7f040024;
+        public static final int action_routes=0x7f04002a;
         public static final int btnDiscard=0x7f040011;
         public static final int btnSave=0x7f040012;
+        public static final int contentLayout=0x7f040015;
         public static final int edtTxTitle=0x7f04000e;
         public static final int edtTxtDesc=0x7f040010;
         public static final int hybrid=0x7f040004;
-        public static final int imgBtnShowMap=0x7f040017;
+        public static final int imgBtnShowMap=0x7f040023;
+        public static final int listItemRow=0x7f040020;
+        public static final int listItemTitle=0x7f040021;
         public static final int map=0x7f040005;
         public static final int none=0x7f040000;
         public static final int normal=0x7f040001;
-        public static final int routesList=0x7f040014;
+        public static final int routesList=0x7f04001f;
         public static final int satellite=0x7f040002;
+        public static final int slideButton=0x7f040016;
         public static final int start_button=0x7f040006;
         public static final int stop_button=0x7f040007;
         public static final int terrain=0x7f040003;
         public static final int tripDistance=0x7f040009;
         public static final int tripTimer=0x7f040008;
         public static final int txtVwDesc=0x7f04000f;
-        public static final int txtVwDistance=0x7f04001a;
+        public static final int txtVwDistance=0x7f040027;
+        public static final int txtVwEndDateTime=0x7f04001e;
+        public static final int txtVwEndTime=0x7f040029;
+        public static final int txtVwHdDistance=0x7f040019;
+        public static final int txtVwHdEnd=0x7f04001d;
+        public static final int txtVwHdSpeed=0x7f040017;
+        public static final int txtVwHdStart=0x7f04001b;
         public static final int txtVwHeading=0x7f04000b;
         public static final int txtVwImp=0x7f04000d;
-        public static final int txtVwRouteID=0x7f040018;
-        public static final int txtVwRouteTitle=0x7f040015;
-        public static final int txtVwSpeed=0x7f040019;
-        public static final int txtVwTime=0x7f04001b;
+        public static final int txtVwRouteDistance=0x7f04001a;
+        public static final int txtVwRouteID=0x7f040025;
+        public static final int txtVwRouteSpeed=0x7f040018;
+        public static final int txtVwRouteTitle=0x7f040022;
+        public static final int txtVwSpeed=0x7f040026;
+        public static final int txtVwStartDateTime=0x7f04001c;
+        public static final int txtVwStartTime=0x7f040028;
         public static final int txtVwTitle=0x7f04000c;
     }
     public static final class integer {
@@ -188,13 +207,15 @@ containing a value of this type.
     public static final class layout {
         public static final int activity_record=0x7f030000;
         public static final int activity_route_save=0x7f030001;
-        public static final int activity_view_routes=0x7f030002;
-        public static final int singleroute=0x7f030003;
+        public static final int activity_view_route=0x7f030002;
+        public static final int activity_view_routes=0x7f030003;
+        public static final int singleroute=0x7f030004;
     }
     public static final class menu {
         public static final int record=0x7f090000;
         public static final int route_save=0x7f090001;
-        public static final int view_routes=0x7f090002;
+        public static final int view_route=0x7f090002;
+        public static final int view_routes=0x7f090003;
     }
     public static final class string {
         public static final int action_routes=0x7f050013;
@@ -264,9 +285,11 @@ containing a value of this type.
         find the service-side assets. [CHAR LIMIT=25] 
          */
         public static final int common_signin_button_text_long=0x7f05000d;
-        public static final int heading_distance=0x7f050027;
-        public static final int heading_duration=0x7f050026;
+        public static final int drawer_handle_desc=0x7f05002c;
+        public static final int heading_distance=0x7f050026;
+        public static final int heading_endtime=0x7f050028;
         public static final int heading_speed=0x7f050025;
+        public static final int heading_starttime=0x7f050027;
         public static final int hello_world=0x7f050014;
         public static final int mark_important=0x7f05001b;
         public static final int message_GPSdisabled=0x7f050022;
@@ -275,13 +298,15 @@ containing a value of this type.
         public static final int route_title_description_text=0x7f05001c;
         public static final int route_title_hint=0x7f05001a;
         public static final int route_title_text=0x7f050019;
-        public static final int show_on_map_image=0x7f050028;
+        public static final int show_on_map_image=0x7f050029;
         public static final int start_recording=0x7f050015;
         public static final int stop_recording=0x7f050016;
         public static final int title_GPSdisabled=0x7f050021;
         public static final int title_activity_route_save=0x7f050020;
         public static final int title_activity_save_route=0x7f050017;
+        public static final int title_activity_show_route=0x7f05002a;
         public static final int title_activity_store_route=0x7f05001f;
+        public static final int title_activity_view_route=0x7f05002b;
         public static final int title_activity_view_routes=0x7f050024;
     }
     public static final class style {
@@ -289,11 +314,6 @@ containing a value of this type.
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
 
         Base application theme for API 11+. This theme completely replaces
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
@@ -308,10 +328,11 @@ containing a value of this type.
          */
         public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- <item name="android:windowNoTitle">true</item> 
          */
         public static final int AppTheme=0x7f080001;
+        /**  All customizations that are NOT specific to a particular API-level can go here. 
+         */
+        public static final int RecordTheme=0x7f080002;
     }
     public static final class styleable {
         /** Attributes that can be used with a MapAttrs.
