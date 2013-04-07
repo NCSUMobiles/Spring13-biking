@@ -85,8 +85,8 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 		httpclient = new DefaultHttpClient();
 		
 		//create a new http post with url to php file as param
-		httppost = new HttpPost("http://10.0.2.2/android/index.php");
-		
+		//httppost = new HttpPost("http://10.0.2.2/android/index.php");
+		httppost = new HttpPost("http://152.46.20.47/android/index.php");
 		Log.i("pratik","connection done");
 		//assign input text to strings
 		username = etUser.getText().toString();

@@ -79,7 +79,7 @@ public class SignUp extends Activity implements OnClickListener {
 		httpclient = new DefaultHttpClient();
 		
 		//create a new http post with url to php file as param
-		httppost = new HttpPost("http://10.0.2.2/android/signup.php");
+		httppost = new HttpPost("http://152.46.20.47/android/signup.php");
 		
 		Log.i("pratik","connection done");
 		//assign input text to strings
