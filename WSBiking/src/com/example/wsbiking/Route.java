@@ -1,24 +1,26 @@
 package com.example.wsbiking;
 
 /**
- * The route class to record teh various paraameters associated with a route
+ * The route class to record the various parameters associated with a route
  * 
  * @author Leon Dmello
  * 
  */
 public class Route {
 	private Integer ID;
-	private String title, description;
-	private float speed, duration, distance;
+	private String title, description, startTime, endTime;
+	private float speed, distance;
 
 	public Route(Integer routeID, String routeName, String routeDesc,
-			float avgSpeed, float routeDuration, float routeDistance) {
+			float avgSpeed, float routeDistance, String routeStart,
+			String routeEnd) {
 		this.ID = routeID;
 		this.title = routeName;
 		this.description = routeDesc;
 		this.speed = avgSpeed;
-		this.duration = routeDuration;
 		this.distance = routeDistance;
+		this.startTime = routeStart;
+		this.endTime = routeEnd;
 	}
 
 	public Integer getID() {
@@ -37,8 +39,12 @@ public class Route {
 		return this.speed;
 	}
 
-	public float getDuration() {
-		return this.duration;
+	public String getStartTime() {
+		return this.startTime;
+	}
+
+	public String getEndTime() {
+		return this.endTime;
 	}
 
 	public float getDistance() {

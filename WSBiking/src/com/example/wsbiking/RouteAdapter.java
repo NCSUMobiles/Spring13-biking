@@ -11,6 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/**
+ * Route adapter class to populate listview of routes
+ * @author Leon Dmello
+ *
+ */
 public class RouteAdapter extends ArrayAdapter<Route> {
 	private Context context;
 	private int layoutResourceId;
@@ -45,7 +50,10 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 			holder.txtVwSpeed = (TextView) row.findViewById(R.id.txtVwSpeed);
 			holder.txtVwDistance = (TextView) row
 					.findViewById(R.id.txtVwDistance);
-			holder.txtVwTime = (TextView) row.findViewById(R.id.txtVwTime);
+			holder.txtVwStartTime = (TextView) row
+					.findViewById(R.id.txtVwStartTime);
+			holder.txtVwEndTime = (TextView) row
+					.findViewById(R.id.txtVwEndTime);
 
 			row.setTag(holder);
 		} else {
@@ -53,13 +61,14 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 		}
 
 		Route route = routes.get(position);
-		
+
 		holder.txtVwRouteTitle.setText(route.getTitle());
 		holder.TxtVwRouteDesc.setText(route.getDescription());
 		holder.txtVwRouteID.setText(String.valueOf(route.getID()));
 		holder.txtVwSpeed.setText(String.valueOf(route.getSpeed()));
 		holder.txtVwDistance.setText(String.valueOf(route.getDistance()));
-		holder.txtVwTime.setText(String.valueOf(route.getDuration()));
+		holder.txtVwStartTime.setText(String.valueOf(route.getStartTime()));
+		holder.txtVwEndTime.setText(String.valueOf(route.getEndTime()));
 
 		return row;
 	}
@@ -71,6 +80,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 		ImageView imgBtnShowMap;
 		TextView txtVwSpeed;
 		TextView txtVwDistance;
-		TextView txtVwTime;
+		TextView txtVwStartTime;
+		TextView txtVwEndTime;
 	}
 }

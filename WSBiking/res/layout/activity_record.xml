@@ -41,7 +41,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/whiteroundedbackground"
+        android:background="@drawable/curved_dark_bg"
         android:padding="5dp"
         android:textColor="#FFFFFF"
         android:textSize="30sp"
@@ -55,18 +55,23 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/whiteroundedbackground"
+        android:background="@drawable/curved_dark_bg"
         android:padding="5dp"
         android:textColor="#FFFFFF"
         android:textSize="30sp"
         android:visibility="invisible" />
 
-    <EditText 
-        android:id="@+id/fbUserId"
+    <ImageButton
+        android:id="@+id/imgVwMyLoc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:visibility="invisible"/>
-    
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/my_loc_bg"
+        android:onClick="plotMyLocation"
+        android:contentDescription="@string/my_location"
+        android:src="@drawable/pointmylocation" />
+
 </RelativeLayout>

@@ -11,8 +11,36 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" >
-
+        android:layout_alignParentTop="true"
+        android:visibility="invisible" >
     </ListView>
+
+    <RelativeLayout
+         android:id="@+id/noDataHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:id="@+id/imgNoData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/no_data_image_desc"
+            android:src="@drawable/nodata" />
+
+        <TextView
+            android:id="@+id/txtVwNoRoutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imgNoData"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/no_routes"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
+    </RelativeLayout>
 
 </RelativeLayout>

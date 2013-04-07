@@ -1,7 +1,5 @@
 package com.example.wsbiking;
 
-import java.util.ArrayList;
-
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,19 +13,24 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.widget.SlidingDrawer;
 import android.widget.TextView;
+import android.widget.Toast;
 
+@SuppressWarnings("deprecation")
 public class ViewRoute extends FragmentActivity {
 
+	private static final String LOG_TAG = "Plot a route activity";
 	private static final float DEFAULTZOOM = 14.3f;
 	private static final float ROUTEWIDTH = 10.0f;
 	private static final int LATITUDE = 0;
 	private static final int LONGITUDE = 1;
+	private static final int ROUTECOLOR = 0x7F0000FF;
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -96,21 +99,28 @@ public class ViewRoute extends FragmentActivity {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	/**
+	 * Populates sliding drawer fields with all the route details
+	 */
 	private void populateDetails() {
-		// TODO Auto-generated method stub
-		TextView txtVwRouteSpeed = (TextView) findViewById(R.id.txtVwRouteSpeed);
-		TextView txtVwRouteDistance = (TextView) findViewById(R.id.txtVwRouteDistance);
-		TextView txtVwStartDateTime = (TextView) findViewById(R.id.txtVwStartDateTime);
-		TextView txtVwEndDateTime = (TextView) findViewById(R.id.txtVwEndDateTime);
-		
-		txtVwRouteSpeed.setText(this.avgSpeed + " mph");
-		txtVwRouteDistance.setText(this.totalDistance + " miles");
-		txtVwStartDateTime.setText(this.startTime);
-		txtVwEndDateTime.setText(this.endtime);
-		
-		SlidingDrawer infoDrawer = (SlidingDrawer) findViewById(R.id.SlidingDrawer);
-		infoDrawer.open();
+
+		try {
+			TextView txtVwRouteSpeed = (TextView) findViewById(R.id.txtVwRouteSpeed);
+			TextView txtVwRouteDistance = (TextView) findViewById(R.id.txtVwRouteDistance);
+			TextView txtVwStartDateTime = (TextView) findViewById(R.id.txtVwStartDateTime);
+			TextView txtVwEndDateTime = (TextView) findViewById(R.id.txtVwEndDateTime);
+
+			txtVwRouteSpeed.setText(this.avgSpeed + " mph");
+			txtVwRouteDistance.setText(this.totalDistance + " miles");
+			txtVwStartDateTime.setText(this.startTime);
+			txtVwEndDateTime.setText(this.endtime);
+
+			SlidingDrawer infoDrawer = (SlidingDrawer) findViewById(R.id.SlidingDrawer);
+			infoDrawer.open();
+		} catch (Exception ex) {
+			Log.e(LOG_TAG, ex.getMessage());
+			showToast("Failed to populate route details");
+		}
 	}
 
 	/**
@@ -122,57 +132,63 @@ public class ViewRoute extends FragmentActivity {
 	 */
 	private void setUpMap() {
 
-		mapUI = mMap.getUiSettings();
-		mapUI.setZoomControlsEnabled(false);
+		try {
+			mapUI = mMap.getUiSettings();
+			mapUI.setZoomControlsEnabled(false);
 
-		Intent viewRouteActivity = getIntent();
+			Intent viewRouteActivity = getIntent();
 
-		this.routeID = Integer.valueOf(viewRouteActivity
-				.getStringExtra("routeID"));
-		this.totalDistance = Float.valueOf(viewRouteActivity
-				.getStringExtra("totalDistance"));
-		this.avgSpeed = Float.valueOf(viewRouteActivity
-				.getStringExtra("avgSpeed"));
-		this.startTime = viewRouteActivity.getStringExtra("startTime");
-		this.endtime = viewRouteActivity.getStringExtra("endTime");
+			this.routeID = Integer.valueOf(viewRouteActivity
+					.getStringExtra("routeID"));
+			this.totalDistance = Float.valueOf(viewRouteActivity
+					.getStringExtra("totalDistance"));
+			this.avgSpeed = Float.valueOf(viewRouteActivity
+					.getStringExtra("avgSpeed"));
+			this.startTime = viewRouteActivity.getStringExtra("startTime");
+			this.endtime = viewRouteActivity.getStringExtra("endTime");
 
-		Cursor resultSet = dbHandler.getRoutePoints(this.routeID);
+			Cursor resultSet = dbHandler.getRoutePoints(this.routeID);
 
-		if (resultSet != null && resultSet.moveToFirst()) {
-			PolylineOptions rectOptions = new PolylineOptions().color(
-					Color.BLUE).width(ROUTEWIDTH);
+			if (resultSet != null && resultSet.moveToFirst()) {
+				PolylineOptions rectOptions = new PolylineOptions()
+						.color(ROUTECOLOR).width(ROUTEWIDTH).geodesic(true);
 
-			LatLng routeStart = new LatLng(resultSet.getDouble(LATITUDE),
-					resultSet.getDouble(LONGITUDE));
+				LatLng routeStart = new LatLng(resultSet.getDouble(LATITUDE),
+						resultSet.getDouble(LONGITUDE));
 
-			LatLng routeEnd = null;
+				LatLng routeEnd = null;
 
-			while (!resultSet.isAfterLast()) {
-				rectOptions.add(routeEnd = new LatLng(resultSet
-						.getDouble(LATITUDE), resultSet.getDouble(LONGITUDE)));
+				while (!resultSet.isAfterLast()) {
+					rectOptions.add(routeEnd = new LatLng(resultSet
+							.getDouble(LATITUDE), resultSet
+							.getDouble(LONGITUDE)));
 
-				resultSet.moveToNext();
+					resultSet.moveToNext();
+				}
+
+				mMap.addPolyline(rectOptions);
+
+				mMap.addMarker(new MarkerOptions()
+						.position(routeStart)
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.cycling))
+						.title(this.startTime));
+
+				mMap.addMarker(new MarkerOptions()
+						.position(routeEnd)
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.finish))
+						.title(this.endtime));
+
+				moveCamera(routeStart, DEFAULTZOOM);
+
+				resultSet.close();
+			} else {
+				showToast("Failed to plot route");
 			}
-
-			mMap.addPolyline(rectOptions);
-
-			mMap.addMarker(new MarkerOptions()
-					.position(routeStart)
-					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.cycling))
-					.title(this.startTime));
-
-			mMap.addMarker(new MarkerOptions()
-					.position(routeEnd)
-					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.finish))
-					.title(this.endtime));
-
-			moveCamera(routeStart, DEFAULTZOOM);
-
-			resultSet.close();
-		} else {
-			// TODO: some error, no route points for route
+		} catch (Exception ex) {
+			Log.e(LOG_TAG, ex.getMessage());
+			showToast("Failed to plot route");
 		}
 	}
 
@@ -182,6 +198,7 @@ public class ViewRoute extends FragmentActivity {
 	 * @param newLocation
 	 */
 	private void moveCamera(LatLng newLocation, float zoomLevel) {
+
 		CameraPosition camPos = new CameraPosition.Builder()
 				.target(newLocation).zoom(zoomLevel).build();
 
@@ -189,5 +206,18 @@ public class ViewRoute extends FragmentActivity {
 				.newCameraPosition(camPos);
 
 		mMap.animateCamera(cameraUpdate);
+	}
+
+	/**
+	 * generic method to display toast
+	 * 
+	 * @param message
+	 */
+	private void showToast(String message) {
+		Toast toast = Toast.makeText(getApplicationContext(), message,
+				Toast.LENGTH_SHORT);
+
+		toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
+		toast.show();
 	}
 }
