@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +47,11 @@ import com.example.yweather.WeatherProcessing;
 import com.example.yweather.YahooWeatherInfoListener;
 import android.graphics.Typeface;
 import android.graphics.Color;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphUser;
+
 
 /**
  * TODO: Improve code structure(Remove redundancy, error checking, try catch,
@@ -94,6 +100,8 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 	private DatabaseHandler dbHandler;
 	private Resources resourceHandler;
 
+	private EditText LoggedUser;
+	private Session session;
 	/**
 	 * Call back from save route activity
 	 */
@@ -129,6 +137,15 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 		setUpMapIfNeeded();
 		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
 	        tv.setVisibility(View.GONE);
+	        
+	    LoggedUser = (EditText) findViewById(R.id.LoggedUser);
+	    if(Main.isLogin)
+	    {
+	    	LoggedUser.setText(Main.logged_user);
+	    } else {
+	    	session = Session.getActiveSession();
+	    	setName(session);
+	    }
 	}
 
 	@Override
@@ -675,4 +692,28 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
     		weatherProcessor.queryYahooWeather(getApplicationContext(), latlong, this);   
     	}
 	}
+	
+	private void setName(final Session session) {
+	    // Make an API call to get user data and define a 
+	    // new callback to handle the response.
+	    Request request = Request.newMeRequest(session, 
+	            new Request.GraphUserCallback() {
+	    		@Override
+	    		public void onCompleted(GraphUser user, Response response) {
+	            // If the response is successful
+	            if (session == Session.getActiveSession()) {
+	                if (user != null) {
+
+	                    Log.i("pratik", "username "+user.getId()+user.getFirstName() + " " + user.getLastName());
+	                    LoggedUser.setText(user.getId());
+	                }
+	            }
+	            if (response.getError() != null) {
+	                // Handle errors, will do so later.
+	            }
+	        }
+
+	    });
+	    request.executeAsync();
+	} 
 }

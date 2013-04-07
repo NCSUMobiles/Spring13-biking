@@ -27,6 +27,7 @@ public class Main extends Activity {
 	
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	public static boolean isLogin = false;
+	public static String logged_user;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

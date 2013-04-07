@@ -197,6 +197,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 								spedit.putString("user", username);
 								spedit.putString("pass", password);
 								
+								Main.logged_user = username;
 								//close the editor
 								spedit.commit();
 								Log.i("pratik","before toast");
