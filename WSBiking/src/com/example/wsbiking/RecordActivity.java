@@ -41,6 +41,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.FragmentActivity;
 
+import com.example.yweather.StoreInfo;
+import com.example.yweather.WeatherProcessing;
+import com.example.yweather.YahooWeatherInfoListener;
+import android.graphics.Typeface;
+import android.graphics.Color;
+
 /**
  * TODO: Improve code structure(Remove redundancy, error checking, try catch,
  * optimization etc.)
@@ -49,7 +55,7 @@ import android.support.v4.app.FragmentActivity;
  *         points when the user has started recording a route.
  * 
  */
-public class RecordActivity extends FragmentActivity {
+public class RecordActivity extends FragmentActivity implements YahooWeatherInfoListener{
 
 	/**
 	 * Constants used in this file
@@ -121,6 +127,8 @@ public class RecordActivity extends FragmentActivity {
 		dbHandler = DatabaseHandler.getInstance(this);
 		resourceHandler = getResources();
 		setUpMapIfNeeded();
+		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+	        tv.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -633,5 +641,38 @@ public class RecordActivity extends FragmentActivity {
 				});
 		AlertDialog alert = alertDialogBuilder.create();
 		alert.show();
+	}
+
+		@Override
+	public void gotWeatherInfo(StoreInfo storeInfo) {
+
+        if(storeInfo != null) {     
+        	TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);         	
+        	tv.setTextColor(Color.WHITE);
+        	Typeface tf = Typeface.createFromAsset(getAssets(),"font/Days.otf");
+        	tv.setTypeface(tf);        
+             
+			tv.setText( storeInfo.getCity() + ", "
+					+ storeInfo.getCountry() + "\n\n"
+					+ "Current Weather: " + storeInfo.getTemperature() + " F" + "\n"
+					+ "Weather Condition : " + storeInfo.getmCurrentText() + "\t\t\t"
+					+ "Humidity: " + storeInfo.getHumidity()					
+					 );		
+        } 
+        
+	}
+
+	public void displayWeather(View v){
+		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+    	if(tv.isShown()){
+    		tv.setVisibility(View.INVISIBLE);
+    	}
+    	else{
+    		String latlong[]={"35.7719", "-78.6389"};  
+    		tv.setVisibility(View.VISIBLE);
+    		tv.setText("Loading..");
+    		WeatherProcessing weatherProcessor = new WeatherProcessing();
+    		weatherProcessor.queryYahooWeather(getApplicationContext(), latlong, this);   
+    	}
 	}
 }

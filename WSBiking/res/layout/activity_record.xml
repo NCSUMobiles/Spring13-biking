@@ -74,4 +74,24 @@
         android:contentDescription="@string/my_location"
         android:src="@drawable/pointmylocation" />
 
+       <ImageView
+         android:id="@+id/imageView1"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_below="@+id/tripDistance"
+         android:layout_marginTop="56dp"
+         android:layout_toLeftOf="@+id/tripDistance"
+         android:onClick="displayWeather"
+         android:src="@drawable/weather" />
+     
+      <TextView
+        android:id="@+id/textViewWeatherInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/black"
+        android:textSize = "20sp" 
+        android:text="Loading.." />
+
 </RelativeLayout>
