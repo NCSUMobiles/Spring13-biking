@@ -22,7 +22,7 @@
         android:layout_alignParentLeft="true"
         android:content="@+id/contentLayout"
         android:handle="@+id/slideButton"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <ImageButton
             android:id="@+id/slideButton"
@@ -37,9 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/top_curved_dark_bg"
-            android:paddingTop="10dp" 
             android:paddingLeft="35dip"
-            android:paddingRight="35dip" >
+            android:paddingRight="35dip"
+            android:paddingTop="10dp" >
 
             <TextView
                 android:id="@+id/txtVwHdSpeed"
@@ -59,7 +59,7 @@
                 android:layout_alignTop="@+id/txtVwHdSpeed"
                 android:layout_toRightOf="@+id/txtVwHdSpeed"
                 android:paddingLeft="5dp"
-                android:text="100.4 mph"
+                android:text=""
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
@@ -85,7 +85,7 @@
                 android:layout_alignTop="@+id/txtVwHdDistance"
                 android:layout_toRightOf="@+id/txtVwHdDistance"
                 android:paddingLeft="5dp"
-                android:text="30.4 miles"
+                android:text=""
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
 
@@ -110,7 +110,7 @@
                 android:layout_alignTop="@+id/txtVwHdStart"
                 android:layout_toRightOf="@+id/txtVwHdStart"
                 android:paddingLeft="5dp"
-                android:text="04/06/2013 at 01:59:45"
+                android:text=""
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
@@ -136,7 +136,7 @@
                 android:layout_alignTop="@+id/txtVwHdEnd"
                 android:layout_toRightOf="@+id/txtVwHdEnd"
                 android:paddingLeft="5dp"
-                android:text="04/06/2013 at 03:59:45"
+                android:text=""
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />

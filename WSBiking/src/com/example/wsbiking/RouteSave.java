@@ -95,6 +95,7 @@ public class RouteSave extends Activity {
 		toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
 		toast.show();
 
+		this.setResult(Activity.RESULT_CANCELED, null);		
 		this.finish();
 	}
 
@@ -121,6 +122,7 @@ public class RouteSave extends Activity {
 			toast.show();
 		}
 		
+		this.setResult(Activity.RESULT_OK, null);		
 		this.finish();
 	}
 

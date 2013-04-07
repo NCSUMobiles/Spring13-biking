@@ -61,4 +61,17 @@
         android:textSize="30sp"
         android:visibility="invisible" />
 
+    <ImageButton
+        android:id="@+id/imgVwMyLoc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/my_loc_bg"
+        android:onClick="plotMyLocation"
+        android:contentDescription="@string/my_location"
+        android:src="@drawable/pointmylocation" />
+
 </RelativeLayout>

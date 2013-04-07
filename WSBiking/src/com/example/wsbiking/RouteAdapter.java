@@ -11,6 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/**
+ * Route adapter class to populate listview of routes
+ * @author Leon Dmello
+ *
+ */
 public class RouteAdapter extends ArrayAdapter<Route> {
 	private Context context;
 	private int layoutResourceId;

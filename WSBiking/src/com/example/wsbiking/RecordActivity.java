@@ -5,15 +5,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,6 +59,8 @@ public class RecordActivity extends FragmentActivity {
 	private static final float METERS_TO_MILES = 1609.34f;
 	private static final CharSequence INITIAL_DISTANCE = "0 meters";
 	private static final float ROUTEWIDTH = 10.0f;
+	private static final int ROUTECOLOR = 0x7F0000FF;
+	private static final String LOG_TAB = "Record activity";
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -64,17 +69,18 @@ public class RecordActivity extends FragmentActivity {
 	private GoogleMap mMap;
 
 	private UiSettings mapUI;
-	private Marker myLocationMarker;
+	private Marker myLocationMarker = null, startMarker = null,
+			endMarker = null;
+	SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
 	private LocationManager locManager;
-	private LocationListener locationListener;
+	private LocationListener locationListener, myLocationListener;
+	private boolean myLocationListening = false, recordingListening = false;
 
 	private boolean gps_enabled = false;
-	// private boolean network_enabled = false;
 
 	private ArrayList<RoutePoint> routePoints;
 
-	// Variables to keep track of current route recording
 	private float totalDistance;
 	private Location lastLocation;
 	private Date startTime;
@@ -82,13 +88,39 @@ public class RecordActivity extends FragmentActivity {
 	private DatabaseHandler dbHandler;
 	private Resources resourceHandler;
 
-	@Override
+	/**
+	 * Call back from save route activity
+	 */
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (resultCode) {
+		case Activity.RESULT_OK:
+			break;
+		case Activity.RESULT_CANCELED:
+
+			mMap.clear();
+			myLocationMarker = null;
+			
+			Location lastKnown = locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			
+			if(lastKnown != null)
+				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
+			else
+				plotMyLocation(null);
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_record);
-		setUpMapIfNeeded();
 		dbHandler = DatabaseHandler.getInstance(this);
 		resourceHandler = getResources();
+		setUpMapIfNeeded();
 	}
 
 	@Override
@@ -102,7 +134,6 @@ public class RecordActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_routes:
-			// TODO: Call show route activity
 			Intent intent = new Intent(this, ViewRoutes.class);
 			startActivity(intent);
 
@@ -163,24 +194,37 @@ public class RecordActivity extends FragmentActivity {
 
 		mapUI = mMap.getUiSettings();
 		mapUI.setZoomControlsEnabled(false);
+		routePoints = new ArrayList<RoutePoint>();
 
 		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-		// TODO: sometimes comes as null, need to handle
-		Location lastKnown = locManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-		if (lastKnown != null)
-			moveCamera(lastKnown, DEFAULTZOOM);
-
-		routePoints = new ArrayList<RoutePoint>();
 
 		// Define a listener that responds to location updates
 		locationListener = new LocationListener() {
 			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location
-				// provider.
 				locationChanged(location);
+			}
+
+			public void onStatusChanged(String provider, int status,
+					Bundle extras) {
+			}
+
+			public void onProviderEnabled(String provider) {
+			}
+
+			public void onProviderDisabled(String provider) {
+				if (provider.equals(LocationManager.GPS_PROVIDER)) {
+					initializePreRecording(true);
+					routePoints.clear();
+					disableRecordingRoute();
+				}
+			}
+		};
+
+		// Define a listener that responds to users location updates to plot his
+		// location once
+		myLocationListener = new LocationListener() {
+			public void onLocationChanged(Location location) {
+				trackMyLocation(location);
 			}
 
 			public void onStatusChanged(String provider, int status,
@@ -198,16 +242,48 @@ public class RecordActivity extends FragmentActivity {
 			gps_enabled = locManager
 					.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		} catch (Exception ex) {
+			Log.e(LOG_TAB, ex.getMessage());
 		}
 
 		if (!gps_enabled) {
-			//TODO: Check GPS status all over app 
-			// AlertDialog.Builder builder = new Builder(this);
-			// builder.setTitle(resourceHandler
-			// .getString(R.string.title_GPSdisabled));
-			// builder.setMessage(resourceHandler
-			// .getString(R.string.message_GPSdisabled));
-			// builder.create().show();
+			disableRecordingRoute();
+		}
+
+		plotMyLocation(null);
+	}
+
+	/**
+	 * Show users current location on map
+	 */
+	public void plotMyLocation(View view) {
+		if (!recordingListening && !myLocationListening) {
+
+			myLocationListening = true;
+
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, myLocationListener);
+		}
+	}
+
+	/**
+	 * Location listener to track users current location
+	 * 
+	 * @param location
+	 */
+	public void trackMyLocation(Location currentLocation) {
+
+		if (recordingListening) {
+			myLocationListening = false;
+			locManager.removeUpdates(myLocationListener);
+		}
+
+		if (myLocationListening && currentLocation != null) {
+
+			myLocationListening = false;
+			locManager.removeUpdates(myLocationListener);
+
+			// Previous GPS location is already present
+			plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, currentLocation);
 		}
 	}
 
@@ -219,68 +295,44 @@ public class RecordActivity extends FragmentActivity {
 	public void locationChanged(Location currentLocation) {
 		if (currentLocation != null) {
 
+			// Previous GPS location is already present
+			plotMyLocationMarker(DEFAULTZOOM, mMap.getCameraPosition().zoom,
+					currentLocation);
+
 			if (lastLocation != null) {
 				totalDistance += currentLocation.distanceTo(lastLocation);
 
-				PolylineOptions rectOptions = new PolylineOptions().add(
-						new LatLng(lastLocation.getLatitude(), lastLocation
-								.getLongitude())).add(
-						new LatLng(currentLocation.getLatitude(),
-								currentLocation.getLongitude()));
-
-				rectOptions.color(Color.BLUE);
-				rectOptions.width(ROUTEWIDTH);
+				PolylineOptions rectOptions = new PolylineOptions()
+						.add(new LatLng(lastLocation.getLatitude(),
+								lastLocation.getLongitude()))
+						.add(new LatLng(currentLocation.getLatitude(),
+								currentLocation.getLongitude()))
+						.color(ROUTECOLOR).width(ROUTEWIDTH);
 
 				mMap.addPolyline(rectOptions);
+
+				TextView distance = (TextView) findViewById(R.id.tripDistance);
+				distance.setText(formatTotalDistance());
+
 			} else {
-				mMap.addMarker(new MarkerOptions().position(
-						new LatLng(currentLocation.getLatitude(),
-								currentLocation.getLongitude())).icon(
-						BitmapDescriptorFactory
-								.fromResource(R.drawable.cycling)));
+				startMarker = mMap.addMarker(new MarkerOptions()
+						.position(
+								new LatLng(currentLocation.getLatitude(),
+										currentLocation.getLongitude()))
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.cycling))
+						.title(dateFormatter.format(startTime)));
+
+				// Timer will start after first start point
+				Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
+				timer.start();
+				timer.setBase(SystemClock.elapsedRealtime());
 			}
-
-			TextView distance = (TextView) findViewById(R.id.tripDistance);
-			distance.setText(formatTotalDistance());
-
-			myLocationMarker.setPosition(new LatLng(currentLocation
-					.getLatitude(), currentLocation.getLongitude()));
 
 			lastLocation = new Location(currentLocation);
 
-			moveCamera(currentLocation, mMap.getCameraPosition().zoom);
-
 			routePoints.add(new RoutePoint(currentLocation.getLatitude(),
 					currentLocation.getLongitude()));
-		}
-	}
-
-	/**
-	 * Converts the meters distance into miles
-	 * 
-	 * @return
-	 */
-	private float convertDistanceToMiles() {
-		float tempDistance = totalDistance, calculatedDistance;
-		calculatedDistance = (float) Math.floor(tempDistance / METERS_TO_MILES);
-		tempDistance %= METERS_TO_MILES;
-		calculatedDistance += tempDistance / METERS_TO_MILES;
-		calculatedDistance = Float.parseFloat(new DecimalFormat("#.##")
-				.format(calculatedDistance));
-
-		return calculatedDistance;
-	}
-
-	/**
-	 * Format distance in decimal meters to rounded meters or miles *
-	 * 
-	 * @return
-	 */
-	private String formatTotalDistance() {
-		if (totalDistance <= METER_THRESHOLD) {
-			return String.valueOf(Math.round(totalDistance) + " meters");
-		} else {
-			return String.valueOf(convertDistanceToMiles() + " miles");
 		}
 	}
 
@@ -295,15 +347,29 @@ public class RecordActivity extends FragmentActivity {
 			gps_enabled = locManager
 					.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		} catch (Exception ex) {
+			Log.e(LOG_TAB, ex.getMessage());
 		}
 
 		if (gps_enabled) {
 
 			mapUI.setCompassEnabled(false);
-
 			mMap.clear();
 
+			if (myLocationMarker != null)
+				myLocationMarker = null;
+
 			startTime = new Date();
+			Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
+			TextView distance = (TextView) findViewById(R.id.tripDistance);
+			ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
+			ImageView btnMyLoc = (ImageView) findViewById(R.id.imgVwMyLoc);
+
+			if (myLocationListening) {
+				locManager.removeUpdates(myLocationListener);
+				myLocationListening = false;
+			}
+
+			recordingListening = true;
 
 			// Get last known location and move camera
 			Location lastKnown = locManager
@@ -314,23 +380,31 @@ public class RecordActivity extends FragmentActivity {
 				LatLng lastKnownLatLng = new LatLng(lastKnown.getLatitude(),
 						lastKnown.getLongitude());
 
-				myLocationMarker = mMap.addMarker(new MarkerOptions().position(
-						lastKnownLatLng).icon(
-						BitmapDescriptorFactory
+				myLocationMarker = mMap.addMarker(new MarkerOptions()
+						.anchor(0.5f, 0.5f)
+						.position(lastKnownLatLng)
+						.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.mylocation)));
 
-				mMap.addMarker(new MarkerOptions().position(lastKnownLatLng)
+				startMarker = mMap.addMarker(new MarkerOptions()
+						.position(lastKnownLatLng)
 						.icon(BitmapDescriptorFactory
-								.fromResource(R.drawable.cycling)));
+								.fromResource(R.drawable.cycling))
+						.title(dateFormatter.format(startTime)));
 
 				lastLocation = new Location(lastKnown);
-				
+
 				routePoints.add(new RoutePoint(lastLocation.getLatitude(),
 						lastLocation.getLongitude()));
 
 				moveCamera(lastKnown, DEFAULTZOOM);
+
+				// Timer will only start after first start point
+				timer.start();
+				timer.setBase(SystemClock.elapsedRealtime());
 			} else {
 				lastLocation = null;
+				showToast("Timer will start after detecting first GPS location");
 			}
 
 			// Register location listener to get periodic updates
@@ -339,23 +413,19 @@ public class RecordActivity extends FragmentActivity {
 					resourceHandler.getInteger(R.integer.min_distance),
 					locationListener);
 
-			// TODO: Initialize route recording parameters
+			// TODO: Initialize all route recording parameters properly
 			totalDistance = 0;
 
-			// Start stop watch
-			Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
-			timer.setBase(SystemClock.elapsedRealtime());
 			timer.setVisibility(View.VISIBLE);
-			timer.start();
 
-			TextView distance = (TextView) findViewById(R.id.tripDistance);
 			distance.setText(INITIAL_DISTANCE);
 			distance.setVisibility(View.VISIBLE);
 
-			// Hide play button
 			btnStart.setVisibility(View.INVISIBLE);
-			ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
 			btnStop.setVisibility(View.VISIBLE);
+			btnMyLoc.setVisibility(View.INVISIBLE);
+		} else {
+			showToast("Please enable GPS to record");
 		}
 	}
 
@@ -366,20 +436,11 @@ public class RecordActivity extends FragmentActivity {
 	 */
 	public void stopRecording(View btnStop) {
 
-		mapUI.setCompassEnabled(true);
-
-		// Stop stop watch
-		Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
-		timer.stop();
-		timer.setVisibility(View.INVISIBLE);
-
-		TextView distance = (TextView) findViewById(R.id.tripDistance);
-		distance.setVisibility(View.INVISIBLE);
-		myLocationMarker.remove();
+		initializePreRecording(false);
 
 		if (routePoints.size() <= 1) {
 
-			mMap.clear();
+			startMarker.remove();
 
 			Toast toast = Toast.makeText(getApplicationContext(),
 					resourceHandler
@@ -393,9 +454,9 @@ public class RecordActivity extends FragmentActivity {
 
 			Date endTime = new Date();
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(
-					"yyyy-MM-dd HH:mm:ss");
+					"MM/dd/yyyy HH:mm:ss");
 
-			mMap.addMarker(new MarkerOptions()
+			endMarker = mMap.addMarker(new MarkerOptions()
 					.position(
 							new LatLng(lastLocation.getLatitude(), lastLocation
 									.getLongitude()))
@@ -405,21 +466,74 @@ public class RecordActivity extends FragmentActivity {
 
 			Intent intent = new Intent(this, RouteSave.class);
 			intent.putParcelableArrayListExtra("routePoints", routePoints);
-			intent.putExtra("totalDistance", convertDistanceToMiles());
+			intent.putExtra("totalDistance", Float
+					.parseFloat(new DecimalFormat("#.##")
+							.format(convertDistanceToMiles())));
 			intent.putExtra("startTime", dateFormatter.format(startTime));
 			intent.putExtra("endTime", dateFormatter.format(endTime));
 			intent.putExtra("avgSpeed", calculateSpeed(endTime));
 
-			startActivity(intent);
+			startActivityForResult(intent, 1);
 		}
 
 		routePoints.clear();
+	}
+
+	/**
+	 * Re-initialize to start recording state
+	 * 
+	 * @param providerDisabled
+	 */
+	private void initializePreRecording(Boolean providerDisabled) {
+
+		if (providerDisabled)
+			mMap.clear();
+
+		mapUI.setCompassEnabled(true);
+
+		Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
+		timer.stop();
+		timer.setVisibility(View.INVISIBLE);
+
+		TextView distance = (TextView) findViewById(R.id.tripDistance);
+		distance.setVisibility(View.INVISIBLE);
+
+		recordingListening = false;
 		locManager.removeUpdates(locationListener);
 
-		// Hide Stop Button
+		ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
 		btnStop.setVisibility(View.INVISIBLE);
+
 		ImageView btnStart = (ImageView) findViewById(R.id.start_button);
 		btnStart.setVisibility(View.VISIBLE);
+
+		ImageView btnMyLoc = (ImageView) findViewById(R.id.imgVwMyLoc);
+		btnMyLoc.setVisibility(View.VISIBLE);
+	}
+
+	/**
+	 * Plots or arranges pin of my location marker
+	 * 
+	 * @param nullZoom
+	 * @param notNullZoom
+	 * @param currentLocation
+	 */
+	private void plotMyLocationMarker(float nullZoom, float notNullZoom,
+			Location currentLocation) {
+		if (myLocationMarker != null) {
+			myLocationMarker.setPosition(new LatLng(currentLocation
+					.getLatitude(), currentLocation.getLongitude()));
+			moveCamera(currentLocation, notNullZoom);
+		} else {
+			myLocationMarker = mMap.addMarker(new MarkerOptions()
+					.anchor(0.5f, 0.5f)
+					.position(
+							new LatLng(currentLocation.getLatitude(),
+									currentLocation.getLongitude()))
+					.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.mylocation)));
+			moveCamera(currentLocation, nullZoom);
+		}
 	}
 
 	/**
@@ -434,7 +548,8 @@ public class RecordActivity extends FragmentActivity {
 		long difference = endTime.getTime() - startTime.getTime();
 		float timeInHours = (float) difference / (float) (1000 * 60 * 60);
 
-		return distanceInMiles / timeInHours;
+		return Float.parseFloat(new DecimalFormat("#.##")
+				.format(distanceInMiles / timeInHours));
 	}
 
 	/**
@@ -451,5 +566,72 @@ public class RecordActivity extends FragmentActivity {
 				.newCameraPosition(camPos);
 
 		mMap.animateCamera(cameraUpdate);
+	}
+
+	/**
+	 * generic method to display toast
+	 * 
+	 * @param message
+	 */
+	private void showToast(String message) {
+		Toast toast = Toast.makeText(getApplicationContext(), message,
+				Toast.LENGTH_SHORT);
+
+		toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
+		toast.show();
+	}
+
+	/**
+	 * Format distance in decimal meters to rounded meters or miles *
+	 * 
+	 * @return
+	 */
+	private String formatTotalDistance() {
+		if (totalDistance <= METER_THRESHOLD) {
+			return String.valueOf(Math.round(totalDistance) + " meters");
+		} else {
+			return String.valueOf(Float.parseFloat(new DecimalFormat("#.##")
+					.format(convertDistanceToMiles())) + " miles");
+		}
+	}
+
+	/**
+	 * Converts the meters distance into miles
+	 * 
+	 * @return
+	 */
+	private float convertDistanceToMiles() {
+		float tempDistance = totalDistance, calculatedDistance;
+		calculatedDistance = (float) Math.floor(tempDistance / METERS_TO_MILES);
+		tempDistance %= METERS_TO_MILES;
+		calculatedDistance += tempDistance / METERS_TO_MILES;
+		return calculatedDistance;
+	}
+
+	/**
+	 * Redirect user to enable GPS if disabled
+	 */
+	private void disableRecordingRoute() {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder
+				.setMessage("GPS is disabled in your device. Enable it?")
+				.setCancelable(false)
+				.setPositiveButton("Enable GPS",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Intent callGPSSettingIntent = new Intent(
+										android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+								startActivity(callGPSSettingIntent);
+							}
+						});
+		alertDialogBuilder.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						showToast("Please enable GPS to record");
+						dialog.cancel();
+					}
+				});
+		AlertDialog alert = alertDialogBuilder.create();
+		alert.show();
 	}
 }

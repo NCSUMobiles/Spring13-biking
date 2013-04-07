@@ -11,9 +11,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 /**
+ * All the database interactions will go in this Singleton handler for DB
  * 
- * @author Leon Dmello All the database interactions will go in this Singleton
- *         handler for DB
+ * @author Leon Dmello
  * 
  */
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -159,7 +159,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 	// Create a new route entry
-	// TODO Null handling to be done while calling
 	public Integer addRoute(ArrayList<RoutePoint> routePoints, String name,
 			String description, float distance, float avgSpeed,
 			String startTime, String endTime) {
@@ -196,6 +195,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return insertedRowID;
 	}
 
+	/**
+	 * Inserts the route points associated with a route into the database
+	 * 
+	 * @param routePoints
+	 * @param insertedRowID
+	 * @return
+	 */
 	private boolean insertRoutePoints(ArrayList<RoutePoint> routePoints,
 			long insertedRowID) {
 
@@ -267,8 +273,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 					routeID = cursor.getInt(ROUTEIDINDEX);
 					routeName = cursor.getString(NAMEINDEX);
 					routeDesc = cursor.getString(DESCRIPTIONINDEX);
-					routeSpeed = cursor.getInt(AVGSPEEDINDEX);
-					routeDistance = cursor.getInt(DISTANCEINDEX);
+					routeSpeed = cursor.getFloat(AVGSPEEDINDEX);
+					routeDistance = cursor.getFloat(DISTANCEINDEX);
 					routeStart = cursor.getString(STARTTIMEINDEX);
 					routeEnd = cursor.getString(ENDTIMEINDEX);
 
@@ -290,6 +296,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return allRoutes;
 	}
 
+	/**
+	 * Returns a cursor with all the route points associated with a route ID
+	 * 
+	 * @param routeID
+	 * @return
+	 */
 	public Cursor getRoutePoints(Integer routeID) {
 
 		Cursor cursor = null;
