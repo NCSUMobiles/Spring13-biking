@@ -7,7 +7,7 @@
     <string name="start_recording">Start Recording</string>
     <string name="stop_recording">Stop Recording</string>
 
-    <integer name="time_interval">30000</integer>
+    <integer name="time_interval">0</integer>
     <integer name="min_distance">0</integer>
 
     <string name="title_activity_save_route">SaveRoute</string>
@@ -45,5 +45,6 @@
     <string name="title_activity_sign_up">SignUp</string>
     <string name="nlogin">Login</string>
     <string name="nlogout">Logout</string>
+    <string name="weather">Weather</string>
 
 </resources>

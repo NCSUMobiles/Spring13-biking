@@ -76,7 +76,8 @@
         <activity
             android:name="com.example.wsbiking.Main"
             android:label="@string/app_name"
-            android:theme="@style/RecordTheme">
+            android:theme="@style/RecordTheme"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

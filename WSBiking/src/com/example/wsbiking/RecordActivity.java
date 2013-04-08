@@ -53,7 +53,6 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
 
-
 /**
  * TODO: Improve code structure(Remove redundancy, error checking, try catch,
  * optimization etc.)
@@ -62,7 +61,8 @@ import com.facebook.model.GraphUser;
  *         points when the user has started recording a route.
  * 
  */
-public class RecordActivity extends FragmentActivity implements YahooWeatherInfoListener{
+public class RecordActivity extends FragmentActivity implements
+		YahooWeatherInfoListener {
 
 	/**
 	 * Constants used in this file
@@ -103,6 +103,7 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 
 	private EditText LoggedUser;
 	private Session session;
+
 	/**
 	 * Call back from save route activity
 	 */
@@ -114,11 +115,11 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 
 			mMap.clear();
 			myLocationMarker = null;
-			
+
 			Location lastKnown = locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			
-			if(lastKnown != null)
+
+			if (lastKnown != null)
 				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
 			else
 				plotMyLocation(null);
@@ -137,16 +138,15 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 		resourceHandler = getResources();
 		setUpMapIfNeeded();
 		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-	        tv.setVisibility(View.GONE);
-	        
-	    LoggedUser = (EditText) findViewById(R.id.LoggedUser);
-	    if(Main.isLogin)
-	    {
-	    	LoggedUser.setText(Main.logged_user);
-	    } else {
-	    	session = Session.getActiveSession();
-	    	setName(session);
-	    }
+		tv.setVisibility(View.GONE);
+
+		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
+		if (Main.isLogin) {
+			LoggedUser.setText(Main.logged_user);
+		} else {
+			session = Session.getActiveSession();
+			setName(session);
+		}
 	}
 
 	@Override
@@ -165,20 +165,24 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 
 			break;
 		case R.id.logout_item:
-			if(Main.isLogin) {
+			if (Main.isLogin) {
 				Main.isLogin = false;
 				SharedPreferences sp = getSharedPreferences("logindetails", 0);
-				SharedPreferences.Editor spedit  = sp.edit();
+				SharedPreferences.Editor spedit = sp.edit();
 				spedit.clear();
 				spedit.commit();
 			}
 			Session session = Session.getActiveSession();
 			if (!session.isClosed()) {
-				Log.i("face","in isClosed");
-	            session.closeAndClearTokenInformation();
-	        }
+				Log.i("face", "in isClosed");
+				session.closeAndClearTokenInformation();
+			}
 			Intent intent1 = new Intent(this, Main.class);
+			intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
 			startActivity(intent1);
+			break;
+		case R.id.weather:
+			displayWeather();
 			break;
 		default:
 			break;
@@ -396,6 +400,8 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 
 			mapUI.setCompassEnabled(false);
 			mMap.clear();
+			
+			findViewById(R.id.textViewWeatherInfo).setVisibility(View.INVISIBLE);
 
 			if (myLocationMarker != null)
 				myLocationMarker = null;
@@ -677,60 +683,58 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 		alert.show();
 	}
 
-		@Override
+	@Override
 	public void gotWeatherInfo(StoreInfo storeInfo) {
 
-        if(storeInfo != null) {     
-        	TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);         	
-        	tv.setTextColor(Color.WHITE);
-        	Typeface tf = Typeface.createFromAsset(getAssets(),"font/Days.otf");
-        	tv.setTypeface(tf);        
-             
-			tv.setText( storeInfo.getCity() + ", "
-					+ storeInfo.getCountry() + "\n\n"
-					+ "Current Weather: " + storeInfo.getTemperature() + " F" + "\n"
-					+ "Weather Condition : " + storeInfo.getmCurrentText() + "\t\t\t"
-					+ "Humidity: " + storeInfo.getHumidity()					
-					 );		
-        } 
-        
+		if (storeInfo != null) {
+			TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+			tv.setText(storeInfo.getCity() + ", " + storeInfo.getCountry()
+					+ "\n\n" + "Current Weather: " + storeInfo.getTemperature()
+					+ " F" + "\n" + "Weather Condition : "
+					+ storeInfo.getmCurrentText() + "\n" + "Humidity: "
+					+ storeInfo.getHumidity());
+		}
+
 	}
 
-	public void displayWeather(View v){
+	public void displayWeather() {
 		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-    	if(tv.isShown()){
-    		tv.setVisibility(View.INVISIBLE);
-    	}
-    	else{
-    		String latlong[]={"35.7719", "-78.6389"};  
-    		tv.setVisibility(View.VISIBLE);
-    		tv.setText("Loading..");
-    		WeatherProcessing weatherProcessor = new WeatherProcessing();
-    		weatherProcessor.queryYahooWeather(getApplicationContext(), latlong, this);   
-    	}
+		if (tv.isShown()) {
+			tv.setVisibility(View.INVISIBLE);
+		} else {
+			String latlong[] = { "35.7719", "-78.6389" };
+			tv.setVisibility(View.VISIBLE);
+			tv.setText("Loading..");
+			WeatherProcessing weatherProcessor = new WeatherProcessing();
+			weatherProcessor.queryYahooWeather(getApplicationContext(),
+					latlong, this);
+		}
 	}
-	
+
 	private void setName(final Session session) {
-	    // Make an API call to get user data and define a 
-	    // new callback to handle the response.
-	    Request request = Request.newMeRequest(session, 
-	            new Request.GraphUserCallback() {
-	    		@Override
-	    		public void onCompleted(GraphUser user, Response response) {
-	            // If the response is successful
-	            if (session == Session.getActiveSession()) {
-	                if (user != null) {
+		// Make an API call to get user data and define a
+		// new callback to handle the response.
+		Request request = Request.newMeRequest(session,
+				new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						// If the response is successful
+						if (session == Session.getActiveSession()) {
+							if (user != null) {
 
-	                    Log.i("pratik", "username "+user.getId()+user.getFirstName() + " " + user.getLastName());
-	                    LoggedUser.setText(user.getId());
-	                }
-	            }
-	            if (response.getError() != null) {
-	                // Handle errors, will do so later.
-	            }
-	        }
+								Log.i("pratik",
+										"username " + user.getId()
+												+ user.getFirstName() + " "
+												+ user.getLastName());
+								LoggedUser.setText(user.getId());
+							}
+						}
+						if (response.getError() != null) {
+							// Handle errors, will do so later.
+						}
+					}
 
-	    });
-	    request.executeAsync();
-	} 
+				});
+		request.executeAsync();
+	}
 }
