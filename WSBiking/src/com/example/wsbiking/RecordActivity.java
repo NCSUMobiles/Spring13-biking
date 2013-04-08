@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
@@ -162,6 +163,22 @@ public class RecordActivity extends FragmentActivity implements YahooWeatherInfo
 			Intent intent = new Intent(this, ViewRoutes.class);
 			startActivity(intent);
 
+			break;
+		case R.id.logout_item:
+			if(Main.isLogin) {
+				Main.isLogin = false;
+				SharedPreferences sp = getSharedPreferences("logindetails", 0);
+				SharedPreferences.Editor spedit  = sp.edit();
+				spedit.clear();
+				spedit.commit();
+			}
+			Session session = Session.getActiveSession();
+			if (!session.isClosed()) {
+				Log.i("face","in isClosed");
+	            session.closeAndClearTokenInformation();
+	        }
+			Intent intent1 = new Intent(this, Main.class);
+			startActivity(intent1);
 			break;
 		default:
 			break;

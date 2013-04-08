@@ -100,6 +100,7 @@ public class Main extends Activity {
         Session session = Session.getActiveSession();
         if (session.isOpened()) {
             //FLogin.setText(R.string.logout);
+        	Log.i("face","inside update view is opened");
             NLogin.setEnabled(false);
             FLogin.setOnClickListener(new OnClickListener() {
                 public void onClick(View view) { onClickLogout(); }

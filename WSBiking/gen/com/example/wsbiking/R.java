@@ -409,6 +409,7 @@ containing a value of this type.
         public static final int large=0x7f040002;
         public static final int listItemRow=0x7f04004a;
         public static final int listItemTitle=0x7f04004b;
+        public static final int logout_item=0x7f040056;
         public static final int map=0x7f04000f;
         public static final int noDataHolder=0x7f040032;
         public static final int none=0x7f040003;

@@ -158,6 +158,7 @@ int id imgVwMyLoc 0x7f040014
 int id large 0x7f040002
 int id listItemRow 0x7f04004a
 int id listItemTitle 0x7f04004b
+int id logout_item 0x7f040056
 int id map 0x7f04000f
 int id noDataHolder 0x7f040032
 int id none 0x7f040003
