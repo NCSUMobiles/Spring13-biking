@@ -46,8 +46,6 @@ import android.support.v4.app.FragmentActivity;
 import com.example.yweather.StoreInfo;
 import com.example.yweather.WeatherProcessing;
 import com.example.yweather.YahooWeatherInfoListener;
-import android.graphics.Typeface;
-import android.graphics.Color;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -178,7 +176,8 @@ public class RecordActivity extends FragmentActivity implements
 				session.closeAndClearTokenInformation();
 			}
 			Intent intent1 = new Intent(this, Main.class);
-			intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+			intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+					| Intent.FLAG_ACTIVITY_NO_HISTORY);
 			startActivity(intent1);
 			break;
 		case R.id.weather:
@@ -304,10 +303,17 @@ public class RecordActivity extends FragmentActivity implements
 	public void plotMyLocation(View view) {
 		if (!recordingListening && !myLocationListening) {
 
-			myLocationListening = true;
+			Location lastKnown = locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			
+			if (lastKnown != null) {
+				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
+			} else {
+				myLocationListening = true;
 
-			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					0, myLocationListener);
+				locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+						0, 0, myLocationListener);
+			}
 		}
 	}
 
@@ -400,8 +406,9 @@ public class RecordActivity extends FragmentActivity implements
 
 			mapUI.setCompassEnabled(false);
 			mMap.clear();
-			
-			findViewById(R.id.textViewWeatherInfo).setVisibility(View.INVISIBLE);
+
+			findViewById(R.id.textViewWeatherInfo)
+					.setVisibility(View.INVISIBLE);
 
 			if (myLocationMarker != null)
 				myLocationMarker = null;

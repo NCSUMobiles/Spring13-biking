@@ -39,6 +39,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	// Route points table name
 	private static final String TABLE_ROUTE_POINTS = "routePoints";
 
+	// TODO: Need to include user ID in table as well
 	// Routes Table Columns names
 	private static final String ROUTEID = "routeID";
 	private static final String NAME = "name";
@@ -249,6 +250,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	public ArrayList<Route> getRoutes() {
 
+		// TODO: Need to include user ID in table as well
 		Cursor cursor = null;
 		ArrayList<Route> allRoutes = null;
 
@@ -318,6 +320,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			Log.e(LOG_TAG,
 					"Failed to get all route points from points table table: "
 							+ ex.getMessage());
+		}
+
+		return cursor;
+	}
+
+	//TODO: Need to include user ID in call as well
+	/**
+	 * Get's all Lat Long points from table
+	 * 
+	 * @return
+	 */
+	public Cursor getEveryLatLong() {
+		Cursor cursor = null;
+
+		try {
+
+			SQLiteDatabase db = this.getWritableDatabase();
+
+			cursor = db.query(TABLE_ROUTE_POINTS, new String[] { LATITUDE,
+					LONGITUDE }, null, null, null, null, null);
+
+		} catch (Exception ex) {
+			Log.e(LOG_TAG, "Failed to get all points from points table table: "
+					+ ex.getMessage());
 		}
 
 		return cursor;

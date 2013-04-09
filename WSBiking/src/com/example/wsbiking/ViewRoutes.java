@@ -2,14 +2,18 @@ package com.example.wsbiking;
 
 import java.util.ArrayList;
 
+import com.facebook.Session;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -67,6 +71,21 @@ public class ViewRoutes extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.view_routes, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.heatmap:
+			Intent intent = new Intent(this, Heatmap.class);
+			startActivity(intent);
+			break;
+		
+		default:
+			break;
+		}
+
 		return true;
 	}
 
