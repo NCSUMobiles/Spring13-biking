@@ -10,9 +10,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".RouteSave" >
 
-   <TextView
+    <TextView
         android:id="@+id/txtVwHeading"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/route_details"
         android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -28,21 +28,11 @@
             android:layout_height="wrap_content"
             android:text="@string/route_title_text"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/txtVwImp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:text="@string/mark_important"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#FF0000" />
-
     </LinearLayout>
 
     <EditText
         android:id="@+id/edtTxTitle"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:gravity="left"
@@ -53,12 +43,11 @@
         android:scrollbarStyle="insideOverlay"
         android:scrollbars="horizontal" >
 
-        <requestFocus />
     </EditText>
 
     <TextView
         android:id="@+id/txtVwDesc"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:text="@string/route_title_description_text"
@@ -66,7 +55,7 @@
 
     <EditText
         android:id="@+id/edtTxtDesc"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:ems="10"
@@ -74,30 +63,5 @@
         android:inputType="textMultiLine"
         android:maxLength="400"
         android:scrollbarStyle="insideOverlay" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp" >
-
-        <Button
-            android:id="@+id/btnDiscard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="7dp"
-            android:layout_weight="0.8"
-            android:onClick="DiscardRoute"
-            android:text="@string/button_discard_route" />
-
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="7dp"
-            android:layout_weight="1"
-            android:onClick="SaveRoute"
-            android:text="@string/button_save_route" />
-
-    </LinearLayout>
 
 </LinearLayout>

@@ -1,8 +1,11 @@
 package com.example.wsbiking;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.content.Intent;
 import android.text.Editable;
@@ -10,6 +13,7 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -22,10 +26,20 @@ import android.widget.Toast;
  * 
  */
 public class RouteSave extends Activity {
+	private static final int SECS = 10;
 	private ArrayList<RoutePoint> routePoints;
 	private float totalDistance, avgSpeed;
 	private String startTime, endtime;
 	private DatabaseHandler dbHandler = null;
+
+	// Handler to Hide after some seconds
+	final Handler handler = new Handler();
+	final Runnable runnable = new Runnable() {
+		@Override
+		public void run() {
+			finish();
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +51,37 @@ public class RouteSave extends Activity {
 
 	@Override
 	public void onStop() {
+
+		EditText edtTitle = (EditText) findViewById(R.id.edtTxTitle);
+		EditText edtDesc = (EditText) findViewById(R.id.edtTxtDesc);
+
+		String routeTitle = edtTitle.getText().toString();
+		String routeDesc = edtDesc.getText().toString();
+
+		if (routeTitle.length() == 0)
+			routeTitle = this.startTime.toString() + " "
+					+ this.endtime.toString();
+
+		if (dbHandler
+				.addRoute(this.routePoints, routeTitle, routeDesc,
+						this.totalDistance, this.avgSpeed, this.startTime,
+						this.endtime) > 0) {
+
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Route Saved", Toast.LENGTH_SHORT);
+
+			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
+			toast.show();
+		} else {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Route couldn't be saved", Toast.LENGTH_SHORT);
+
+			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
+			toast.show();
+		}
+
+		this.setResult(Activity.RESULT_OK, null);
+
 		dbHandler.close();
 		super.onStop();
 	}
@@ -51,79 +96,13 @@ public class RouteSave extends Activity {
 		this.startTime = recordActivity.getStringExtra("startTime");
 		this.endtime = recordActivity.getStringExtra("endTime");
 
-		Button btnSave = (Button) findViewById(R.id.btnSave);
-		btnSave.setEnabled(false);
-
-		EditText edtTitle = (EditText) findViewById(R.id.edtTxTitle);
-
-		edtTitle.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable titleText) {
-				ToggleSave(titleText);
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-	}
-
-	private void ToggleSave(Editable titleText) {
-		Button btnSave = (Button) findViewById(R.id.btnSave);
-
-		if (!btnSave.isEnabled() && titleText.length() > 0)
-			btnSave.setEnabled(true);
-		else if (titleText.length() == 0)
-			btnSave.setEnabled(false);
-	}
-
-	public void DiscardRoute(View btnDiscard) {
-		Toast toast = Toast.makeText(getApplicationContext(),
-				"Route Discarded", Toast.LENGTH_SHORT);
-
-		toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-		toast.show();
-
-		this.setResult(Activity.RESULT_CANCELED, null);		
-		this.finish();
-	}
-
-	public void SaveRoute(View btnSave) {
 		EditText edtTitle = (EditText) findViewById(R.id.edtTxTitle);
 		EditText edtDesc = (EditText) findViewById(R.id.edtTxtDesc);
 
-		String routeTitle = edtTitle.getText().toString();
-		String routeDesc = edtDesc.getText().toString();
+		edtTitle.addTextChangedListener(new textChangedListener());
+		edtDesc.addTextChangedListener(new textChangedListener());
 
-		if (dbHandler.addRoute(this.routePoints, routeTitle, routeDesc,
-				this.totalDistance, this.avgSpeed, this.startTime, this.endtime) > 0) {
-
-			Toast toast = Toast.makeText(getApplicationContext(),
-					"Route Saved", Toast.LENGTH_SHORT);
-
-			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-			toast.show();
-		} else {
-			Toast toast = Toast.makeText(getApplicationContext(),
-					"Route couldn't be saved", Toast.LENGTH_SHORT);
-
-			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-			toast.show();
-		}
-		
-		this.setResult(Activity.RESULT_OK, null);		
-		this.finish();
+		handler.postDelayed(runnable, SECS * 1000);
 	}
 
 	@Override
@@ -131,5 +110,28 @@ public class RouteSave extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.route_save, menu);
 		return true;
+	}
+
+	private class textChangedListener implements TextWatcher {
+
+		@Override
+		public void afterTextChanged(Editable arg0) {
+			handler.removeCallbacks(runnable);
+			handler.postDelayed(runnable, SECS * 1000);
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			// TODO Auto-generated method stub
+
+		}
 	}
 }

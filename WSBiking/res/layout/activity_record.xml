@@ -18,6 +18,8 @@
         android:layout_centerHorizontal="true"
         android:clickable="true"
         android:contentDescription="@string/start_recording"
+        android:maxHeight="166dp"
+        android:maxWidth="166dp"
         android:onClick="startRecording"
         android:src="@drawable/start_button" />
 

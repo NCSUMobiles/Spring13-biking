@@ -109,21 +109,7 @@ public class RecordActivity extends FragmentActivity implements
 		switch (resultCode) {
 		case Activity.RESULT_OK:
 			break;
-		case Activity.RESULT_CANCELED:
-
-			mMap.clear();
-			myLocationMarker = null;
-
-			Location lastKnown = locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-			if (lastKnown != null)
-				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
-			else
-				plotMyLocation(null);
-
-			break;
-
+		
 		default:
 			break;
 		}
