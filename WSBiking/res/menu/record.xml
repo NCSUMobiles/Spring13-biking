@@ -12,6 +12,12 @@
         android:showAsAction="always"
         android:title="@string/weather"/>
     
+    <item
+        android:id="@+id/heatmap"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/title_activity_heatmap"/>
+    
     <item 
         android:id="@+id/logout_item"
         android:orderInCategory="102"

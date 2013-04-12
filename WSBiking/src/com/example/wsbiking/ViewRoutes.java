@@ -2,14 +2,9 @@ package com.example.wsbiking;
 
 import java.util.ArrayList;
 
-import com.facebook.Session;
-
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;

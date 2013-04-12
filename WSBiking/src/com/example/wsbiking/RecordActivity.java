@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,12 +16,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -72,6 +75,7 @@ public class RecordActivity extends FragmentActivity implements
 	private static final float ROUTEWIDTH = 10.0f;
 	private static final int ROUTECOLOR = 0x7F0000FF;
 	private static final String LOG_TAB = "Record activity";
+	private static final int SECS = 5;
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -102,27 +106,24 @@ public class RecordActivity extends FragmentActivity implements
 	private EditText LoggedUser;
 	private Session session;
 
-	/**
-	 * Call back from save route activity
-	 */
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (resultCode) {
-		case Activity.RESULT_OK:
-			break;
-		
-		default:
-			break;
+	// Handler to Hide after some seconds
+	final Handler handler = new Handler();
+	final Runnable runnable = new Runnable() {
+		@Override
+		public void run() {
+			handler.removeCallbacks(runnable);
+			displayWeather();
 		}
-	}
+	};
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_record);
+
 		dbHandler = DatabaseHandler.getInstance(this);
 		resourceHandler = getResources();
+
 		setUpMapIfNeeded();
-		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-		tv.setVisibility(View.GONE);
 
 		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
 		if (Main.isLogin) {
@@ -168,6 +169,10 @@ public class RecordActivity extends FragmentActivity implements
 			break;
 		case R.id.weather:
 			displayWeather();
+			break;
+		case R.id.heatmap:
+			Intent heatmapIntent = new Intent(this, Heatmap.class);
+			startActivity(heatmapIntent);
 			break;
 		default:
 			break;
@@ -283,6 +288,43 @@ public class RecordActivity extends FragmentActivity implements
 		plotMyLocation(null);
 	}
 
+	/* Weather functions START */
+
+	@Override
+	public void gotWeatherInfo(StoreInfo storeInfo) {
+
+		if (storeInfo != null) {
+			TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+			tv.setText(storeInfo.getCity() + ", " + storeInfo.getCountry()
+					+ "\n\n" + "Current Weather: " + storeInfo.getTemperature()
+					+ " F" + "\n" + "Weather Condition : "
+					+ storeInfo.getmCurrentText() + "\n" + "Humidity: "
+					+ storeInfo.getHumidity());
+		}
+
+	}
+
+	public void displayWeather() {
+		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+		
+		handler.removeCallbacks(runnable);
+
+		if (tv.isShown()) {
+			tv.setVisibility(View.INVISIBLE);			
+		} else {
+			String latlong[] = { "35.7719", "-78.6389" };
+			tv.setVisibility(View.VISIBLE);
+			tv.setText("Loading..");
+			WeatherProcessing weatherProcessor = new WeatherProcessing();
+			weatherProcessor.queryYahooWeather(getApplicationContext(),
+					latlong, this);
+
+			handler.postDelayed(runnable, SECS * 1000);
+		}		
+	}
+
+	/* Weather functions END */
+
 	/**
 	 * Show users current location on map
 	 */
@@ -291,7 +333,7 @@ public class RecordActivity extends FragmentActivity implements
 
 			Location lastKnown = locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			
+
 			if (lastKnown != null) {
 				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
 			} else {
@@ -313,10 +355,7 @@ public class RecordActivity extends FragmentActivity implements
 		if (recordingListening) {
 			myLocationListening = false;
 			locManager.removeUpdates(myLocationListener);
-		}
-
-		if (myLocationListening && currentLocation != null) {
-
+		} else if (myLocationListening && currentLocation != null) {
 			myLocationListening = false;
 			locManager.removeUpdates(myLocationListener);
 
@@ -390,27 +429,26 @@ public class RecordActivity extends FragmentActivity implements
 
 		if (gps_enabled) {
 
-			mapUI.setCompassEnabled(false);
-			mMap.clear();
-
-			findViewById(R.id.textViewWeatherInfo)
-					.setVisibility(View.INVISIBLE);
-
-			if (myLocationMarker != null)
-				myLocationMarker = null;
-
 			startTime = new Date();
+
+			TextView weatherInfo = (TextView) findViewById(R.id.textViewWeatherInfo);
 			Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
 			TextView distance = (TextView) findViewById(R.id.tripDistance);
 			ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
 			ImageView btnMyLoc = (ImageView) findViewById(R.id.imgVwMyLoc);
 
+			mapUI.setCompassEnabled(false);
+			mMap.clear();
+
+			// Remove my location listener
 			if (myLocationListening) {
 				locManager.removeUpdates(myLocationListener);
 				myLocationListening = false;
 			}
 
+			// Initialize all route recording parameters properly
 			recordingListening = true;
+			totalDistance = 0;
 
 			// Get last known location and move camera
 			Location lastKnown = locManager
@@ -454,17 +492,13 @@ public class RecordActivity extends FragmentActivity implements
 					resourceHandler.getInteger(R.integer.min_distance),
 					locationListener);
 
-			// TODO: Initialize all route recording parameters properly
-			totalDistance = 0;
-
-			timer.setVisibility(View.VISIBLE);
-
 			distance.setText(INITIAL_DISTANCE);
+			timer.setVisibility(View.VISIBLE);
 			distance.setVisibility(View.VISIBLE);
-
 			btnStart.setVisibility(View.INVISIBLE);
 			btnStop.setVisibility(View.VISIBLE);
 			btnMyLoc.setVisibility(View.INVISIBLE);
+			weatherInfo.setVisibility(View.INVISIBLE);
 		} else {
 			showToast("Please enable GPS to record");
 		}
@@ -481,21 +515,16 @@ public class RecordActivity extends FragmentActivity implements
 
 		if (routePoints.size() <= 1) {
 
-			startMarker.remove();
+			if (startMarker != null) {
+				startMarker.remove();
+				startMarker = null;
+			}
 
-			Toast toast = Toast.makeText(getApplicationContext(),
-					resourceHandler
-							.getString(R.string.message_single_route_point),
-					Toast.LENGTH_SHORT);
-
-			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-			toast.show();
-
+			showToast(resourceHandler
+					.getString(R.string.message_single_route_point));
 		} else {
 
 			Date endTime = new Date();
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(
-					"MM/dd/yyyy HH:mm:ss");
 
 			endMarker = mMap.addMarker(new MarkerOptions()
 					.position(
@@ -514,7 +543,7 @@ public class RecordActivity extends FragmentActivity implements
 			intent.putExtra("endTime", dateFormatter.format(endTime));
 			intent.putExtra("avgSpeed", calculateSpeed(endTime));
 
-			startActivityForResult(intent, 1);
+			startActivity(intent);
 		}
 
 		routePoints.clear();
@@ -530,26 +559,22 @@ public class RecordActivity extends FragmentActivity implements
 		if (providerDisabled)
 			mMap.clear();
 
-		mapUI.setCompassEnabled(true);
-
 		Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
-		timer.stop();
-		timer.setVisibility(View.INVISIBLE);
-
 		TextView distance = (TextView) findViewById(R.id.tripDistance);
-		distance.setVisibility(View.INVISIBLE);
+		ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
+		ImageView btnStart = (ImageView) findViewById(R.id.start_button);
+		ImageView btnMyLoc = (ImageView) findViewById(R.id.imgVwMyLoc);
 
+		mapUI.setCompassEnabled(true);
 		recordingListening = false;
 		locManager.removeUpdates(locationListener);
 
-		ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
+		timer.stop();
+		timer.setVisibility(View.INVISIBLE);
 		btnStop.setVisibility(View.INVISIBLE);
-
-		ImageView btnStart = (ImageView) findViewById(R.id.start_button);
 		btnStart.setVisibility(View.VISIBLE);
-
-		ImageView btnMyLoc = (ImageView) findViewById(R.id.imgVwMyLoc);
 		btnMyLoc.setVisibility(View.VISIBLE);
+		distance.setVisibility(View.INVISIBLE);
 	}
 
 	/**
@@ -562,6 +587,8 @@ public class RecordActivity extends FragmentActivity implements
 	private void plotMyLocationMarker(float nullZoom, float notNullZoom,
 			Location currentLocation) {
 		if (myLocationMarker != null) {
+			// My location marker already exists, just move it
+
 			myLocationMarker.setPosition(new LatLng(currentLocation
 					.getLatitude(), currentLocation.getLongitude()));
 			moveCamera(currentLocation, notNullZoom);
@@ -674,34 +701,6 @@ public class RecordActivity extends FragmentActivity implements
 				});
 		AlertDialog alert = alertDialogBuilder.create();
 		alert.show();
-	}
-
-	@Override
-	public void gotWeatherInfo(StoreInfo storeInfo) {
-
-		if (storeInfo != null) {
-			TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-			tv.setText(storeInfo.getCity() + ", " + storeInfo.getCountry()
-					+ "\n\n" + "Current Weather: " + storeInfo.getTemperature()
-					+ " F" + "\n" + "Weather Condition : "
-					+ storeInfo.getmCurrentText() + "\n" + "Humidity: "
-					+ storeInfo.getHumidity());
-		}
-
-	}
-
-	public void displayWeather() {
-		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-		if (tv.isShown()) {
-			tv.setVisibility(View.INVISIBLE);
-		} else {
-			String latlong[] = { "35.7719", "-78.6389" };
-			tv.setVisibility(View.VISIBLE);
-			tv.setText("Loading..");
-			WeatherProcessing weatherProcessor = new WeatherProcessing();
-			weatherProcessor.queryYahooWeather(getApplicationContext(),
-					latlong, this);
-		}
 	}
 
 	private void setName(final Session session) {

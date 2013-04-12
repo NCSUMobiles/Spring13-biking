@@ -3,7 +3,7 @@
 
     <string name="app_name">WSBiking</string>
     <string name="action_settings">Settings</string>
-    <string name="action_routes">View Routes</string>
+    <string name="action_routes">Routes</string>
     <string name="start_recording">Start Recording</string>
     <string name="stop_recording">Stop Recording</string>
 
@@ -12,6 +12,7 @@
 
     <string name="title_activity_save_route">SaveRoute</string>
     <string name="route_details">Route Details</string>
+    <string name="route_details_hint">Closes after 10 seconds of inactivity</string>
     <string name="route_title_text">Title</string>
     <string name="route_title_hint">Enter a route title</string>
     <string name="mark_important">*</string>
@@ -44,9 +45,13 @@
     <string name="logout">Logout from Facebook</string>
     <string name="title_activity_sign_up">SignUp</string>
     <string name="nlogin">Login</string>
-    <string name="nlogout">Logout</string>
+    <string name="nlogout">Log Out</string>
     <string name="weather">Weather</string>
     <string name="title_activity_heatmap">Heatmap</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_tab">TabActivity</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
 
 </resources>

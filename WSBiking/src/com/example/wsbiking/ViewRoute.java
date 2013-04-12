@@ -156,12 +156,19 @@ public class ViewRoute extends FragmentActivity {
 				LatLng routeStart = new LatLng(resultSet.getDouble(LATITUDE),
 						resultSet.getDouble(LONGITUDE));
 
-				LatLng routeEnd = null;
+				LatLng routeEnd = null, routeMid = null;
 
 				while (!resultSet.isAfterLast()) {
-					rectOptions.add(routeEnd = new LatLng(resultSet
-							.getDouble(LATITUDE), resultSet
-							.getDouble(LONGITUDE)));
+					rectOptions.add(new LatLng(resultSet.getDouble(LATITUDE),
+							resultSet.getDouble(LONGITUDE)));
+
+					if (routeMid == null && resultSet.getPosition() == resultSet.getCount() / 2)
+						routeMid = new LatLng(resultSet.getDouble(LATITUDE),
+								resultSet.getDouble(LONGITUDE));
+
+					if (resultSet.isLast())
+						routeEnd = new LatLng(resultSet.getDouble(LATITUDE),
+								resultSet.getDouble(LONGITUDE));
 
 					resultSet.moveToNext();
 				}
@@ -180,7 +187,7 @@ public class ViewRoute extends FragmentActivity {
 								.fromResource(R.drawable.finish))
 						.title(this.endtime));
 
-				moveCamera(routeStart, DEFAULTZOOM);
+				moveCamera(routeMid, DEFAULTZOOM);
 
 				resultSet.close();
 			} else {
