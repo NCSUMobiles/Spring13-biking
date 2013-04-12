@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,11 +19,9 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -106,7 +103,7 @@ public class RecordActivity extends FragmentActivity implements
 	private EditText LoggedUser;
 	private Session session;
 
-	// Handler to Hide after some seconds
+	// Handler to Hide Weather popup after some seconds
 	final Handler handler = new Handler();
 	final Runnable runnable = new Runnable() {
 		@Override
@@ -306,11 +303,11 @@ public class RecordActivity extends FragmentActivity implements
 
 	public void displayWeather() {
 		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-		
+
 		handler.removeCallbacks(runnable);
 
 		if (tv.isShown()) {
-			tv.setVisibility(View.INVISIBLE);			
+			tv.setVisibility(View.INVISIBLE);
 		} else {
 			String latlong[] = { "35.7719", "-78.6389" };
 			tv.setVisibility(View.VISIBLE);
@@ -320,10 +317,37 @@ public class RecordActivity extends FragmentActivity implements
 					latlong, this);
 
 			handler.postDelayed(runnable, SECS * 1000);
-		}		
+		}
 	}
 
 	/* Weather functions END */
+
+	/**
+	 * Plots or arranges pin of my location marker
+	 * 
+	 * @param nullZoom
+	 * @param notNullZoom
+	 * @param currentLocation
+	 */
+	private void plotMyLocationMarker(float nullZoom, float notNullZoom,
+			Location currentLocation) {
+		if (myLocationMarker != null) {
+			// My location marker already exists, just move it
+
+			myLocationMarker.setPosition(new LatLng(currentLocation
+					.getLatitude(), currentLocation.getLongitude()));
+			moveCamera(currentLocation, notNullZoom);
+		} else {
+			myLocationMarker = mMap.addMarker(new MarkerOptions()
+					.anchor(0.5f, 0.5f)
+					.position(
+							new LatLng(currentLocation.getLatitude(),
+									currentLocation.getLongitude()))
+					.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.mylocation)));
+			moveCamera(currentLocation, nullZoom);
+		}
+	}
 
 	/**
 	 * Show users current location on map
@@ -331,17 +355,9 @@ public class RecordActivity extends FragmentActivity implements
 	public void plotMyLocation(View view) {
 		if (!recordingListening && !myLocationListening) {
 
-			Location lastKnown = locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-			if (lastKnown != null) {
-				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
-			} else {
-				myLocationListening = true;
-
-				locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-						0, 0, myLocationListener);
-			}
+			myLocationListening = true;
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, myLocationListener);
 		}
 	}
 
@@ -390,7 +406,6 @@ public class RecordActivity extends FragmentActivity implements
 
 				TextView distance = (TextView) findViewById(R.id.tripDistance);
 				distance.setText(formatTotalDistance());
-
 			} else {
 				startMarker = mMap.addMarker(new MarkerOptions()
 						.position(
@@ -449,6 +464,7 @@ public class RecordActivity extends FragmentActivity implements
 			// Initialize all route recording parameters properly
 			recordingListening = true;
 			totalDistance = 0;
+			myLocationMarker = null;
 
 			// Get last known location and move camera
 			Location lastKnown = locManager
@@ -458,12 +474,6 @@ public class RecordActivity extends FragmentActivity implements
 
 				LatLng lastKnownLatLng = new LatLng(lastKnown.getLatitude(),
 						lastKnown.getLongitude());
-
-				myLocationMarker = mMap.addMarker(new MarkerOptions()
-						.anchor(0.5f, 0.5f)
-						.position(lastKnownLatLng)
-						.icon(BitmapDescriptorFactory
-								.fromResource(R.drawable.mylocation)));
 
 				startMarker = mMap.addMarker(new MarkerOptions()
 						.position(lastKnownLatLng)
@@ -475,9 +485,9 @@ public class RecordActivity extends FragmentActivity implements
 
 				routePoints.add(new RoutePoint(lastLocation.getLatitude(),
 						lastLocation.getLongitude()));
-
-				moveCamera(lastKnown, DEFAULTZOOM);
-
+				
+				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
+				
 				// Timer will only start after first start point
 				timer.start();
 				timer.setBase(SystemClock.elapsedRealtime());
@@ -576,34 +586,7 @@ public class RecordActivity extends FragmentActivity implements
 		btnMyLoc.setVisibility(View.VISIBLE);
 		distance.setVisibility(View.INVISIBLE);
 	}
-
-	/**
-	 * Plots or arranges pin of my location marker
-	 * 
-	 * @param nullZoom
-	 * @param notNullZoom
-	 * @param currentLocation
-	 */
-	private void plotMyLocationMarker(float nullZoom, float notNullZoom,
-			Location currentLocation) {
-		if (myLocationMarker != null) {
-			// My location marker already exists, just move it
-
-			myLocationMarker.setPosition(new LatLng(currentLocation
-					.getLatitude(), currentLocation.getLongitude()));
-			moveCamera(currentLocation, notNullZoom);
-		} else {
-			myLocationMarker = mMap.addMarker(new MarkerOptions()
-					.anchor(0.5f, 0.5f)
-					.position(
-							new LatLng(currentLocation.getLatitude(),
-									currentLocation.getLongitude()))
-					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.mylocation)));
-			moveCamera(currentLocation, nullZoom);
-		}
-	}
-
+	
 	/**
 	 * Returns average speed in terms of miler per hour
 	 * 

@@ -61,7 +61,7 @@ public class Heatmap extends Activity {
 		private Context appContext;
 
 		public JavaScriptInterface(Context context) {
-			appContext = context;
+			this.appContext = context;
 		}
 
 		// TODO: Pass user ID to get current user's lat long points
