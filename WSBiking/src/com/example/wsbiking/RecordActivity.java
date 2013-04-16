@@ -122,13 +122,13 @@ public class RecordActivity extends FragmentActivity implements
 
 		setUpMapIfNeeded();
 
-		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
-		if (Main.isLogin) {
-			LoggedUser.setText(Main.logged_user);
-		} else {
-			session = Session.getActiveSession();
-			setName(session);
-		}
+//		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
+//		if (Main.isLogin) {
+//			LoggedUser.setText(Main.logged_user);
+//		} else {
+//			session = Session.getActiveSession();
+//			setName(session);
+//		}
 	}
 
 	@Override
