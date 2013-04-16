@@ -8,7 +8,8 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="5dp" 
-    android:background="@drawable/listitembg">
+    android:background="@drawable/show_on_map"
+    android:onClick="showRouteOnMap" >
 
     <LinearLayout
         android:id="@+id/listItemTitle"
@@ -27,10 +28,8 @@
             android:id="@+id/imgBtnShowMap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/show_on_map"
-            android:clickable="true"
-            android:contentDescription="@string/show_on_map_image"
-            android:onClick="showRouteOnMap" />
+            android:background="@drawable/showonmap"
+            android:contentDescription="@string/show_on_map_image"/>
         
     </LinearLayout>
 

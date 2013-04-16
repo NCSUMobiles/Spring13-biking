@@ -64,5 +64,12 @@
         android:inputType="textMultiLine"
         android:maxLength="400"
         android:scrollbarStyle="insideOverlay" />
+    
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save_dialog_close" 
+        android:onClick="closeDialog"/>    
 
 </LinearLayout>

@@ -48,10 +48,6 @@
     <string name="nlogout">Log Out</string>
     <string name="weather">Weather</string>
     <string name="title_activity_heatmap">Heatmap</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_tab">TabActivity</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
+    <string name="save_dialog_close">Save and Close</string>
 
 </resources>

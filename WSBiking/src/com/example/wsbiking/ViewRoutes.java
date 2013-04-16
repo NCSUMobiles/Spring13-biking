@@ -75,10 +75,9 @@ public class ViewRoutes extends Activity {
 	 * 
 	 * @param showButton
 	 */
-	public void showRouteOnMap(View showButton) {
+	public void showRouteOnMap(View rowContainer) {
 		try {
-			View rowContainer = (View) showButton.getParent().getParent();
-
+			
 			TextView txtVwRouteIndex = (TextView) rowContainer
 					.findViewById(R.id.txtVwRouteIndex);
 

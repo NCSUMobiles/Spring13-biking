@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -62,9 +63,10 @@ public class RouteSave extends Activity {
 				this.endtime, Main.logged_user);
 
 		int routeID = dbHandler.addRoute(route);
-		
-		//TODO: Server call to save route to server and also send all pending routes that aren't synced
-		
+
+		// TODO: Server call to save route to server and also send all pending
+		// routes that aren't synced
+
 		if (routeID > 0) {
 			showToast("Route Saved");
 		} else {
@@ -73,6 +75,10 @@ public class RouteSave extends Activity {
 
 		dbHandler.close();
 		super.onStop();
+	}
+
+	public void closeDialog(View saveButton) {
+		this.finish();
 	}
 
 	private void InitializeElements() {
