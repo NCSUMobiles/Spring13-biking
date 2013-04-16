@@ -16,10 +16,6 @@ import com.facebook.Settings;
 
 public class Main extends Activity {
 
-	//private Button NLogin;
-	//private Button FLogin;
-	//private Button signUp;
-	//private Button anon;
 	private ImageView FLogin;
 	private ImageView NLogin;
 	private ImageView signUp;
@@ -27,6 +23,7 @@ public class Main extends Activity {
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	public static boolean isLogin = false;
 	public static String logged_user;
+	private static final String TAG = "MAIN";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,17 +54,6 @@ public class Main extends Activity {
 			}
 		});
 		
-		/*anon.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent intent = new Intent(Main.this, RecordActivity.class);
-				startActivity(intent);
-			}
-		}
-				
-				);*/
 		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 		
 		Session session = Session.getActiveSession();
@@ -98,28 +84,28 @@ public class Main extends Activity {
     private void updateView() {
         Session session = Session.getActiveSession();
         if (session.isOpened()) {
-            Log.i("face","inside update view is opened");
+            //FLogin.setText(R.string.logout);
+        	Log.i(TAG,"inside update view if");
             NLogin.setEnabled(false);
-            FLogin.setOnClickListener(new OnClickListener() {
+            /*FLogin.setOnClickListener(new OnClickListener() {
                 public void onClick(View view) { onClickLogout(); }
-            });
+            });*/
             callHome();
         } else {
+            //FLogin.setText(R.string.login);
+        	Log.i(TAG,"inside update view else");
             NLogin.setEnabled(true);
             FLogin.setOnClickListener(new OnClickListener() {
                 public void onClick(View view) { onClickLogin();  }
             });
         }
-        
-        Log.i("pratik", "hello" + Main.isLogin);
-        if (Main.isLogin) {
-        	FLogin.setEnabled(false);        	
-        }
+       
     }
     
     private void onClickLogin() {
     	//FLogin.setBackgroundResource(R.drawable.login_down);
         Session session = Session.getActiveSession();
+        Log.i(TAG,"inside onclickLogin");
         if (!session.isOpened() && !session.isClosed()) {
             session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
         } else {
@@ -128,13 +114,6 @@ public class Main extends Activity {
     
     }
 
-    private void onClickLogout() {
-        Session session = Session.getActiveSession();
-        if (!session.isClosed()) {
-            session.closeAndClearTokenInformation();
-        }
-    }
-    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

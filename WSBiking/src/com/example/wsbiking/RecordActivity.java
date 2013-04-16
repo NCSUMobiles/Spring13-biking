@@ -78,6 +78,7 @@ public class RecordActivity extends FragmentActivity implements
 	private static final int ROUTECOLOR = 0x7F0000FF;
 	private static final String LOG_TAB = "Record activity";
 	private static final int SECS = 5;
+	private static final String TAG = "RECORD";
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -127,13 +128,13 @@ public class RecordActivity extends FragmentActivity implements
 
 		setUpMapIfNeeded();
 
-		// LoggedUser = (EditText) findViewById(R.id.LoggedUser);
-		// if (Main.isLogin) {
-		// LoggedUser.setText(Main.logged_user);
-		// } else {
-		// session = Session.getActiveSession();
-		// setName(session);
-		// }
+		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
+		if (Main.isLogin) {
+			LoggedUser.setText(Main.logged_user);
+		} else {
+			session = Session.getActiveSession();
+			setName(session);
+		}
 	}
 
 	@Override
@@ -465,7 +466,10 @@ public class RecordActivity extends FragmentActivity implements
 		} catch (Exception ex) {
 			Log.e(LOG_TAB, ex.getMessage());
 		}
-
+		Log.i(TAG,"text button is "+LoggedUser.getText());
+		Main.logged_user = LoggedUser.getText().toString();
+		Log.i(TAG,"string in main is "+Main.logged_user);
+		
 		if (gps_enabled) {
 
 			startTime = new Date();
@@ -721,7 +725,7 @@ public class RecordActivity extends FragmentActivity implements
 						if (session == Session.getActiveSession()) {
 							if (user != null) {
 
-								Log.i("pratik",
+								Log.i(TAG,
 										"username " + user.getId()
 												+ user.getFirstName() + " "
 												+ user.getLastName());

@@ -16,8 +16,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-import com.facebook.Session;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -26,13 +24,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 public class SignUp extends Activity implements OnClickListener {
 
+	private static final String TAG = "SIGNUP";
 	EditText username, password, cpassword;
 	ImageView signup;
 	
@@ -79,9 +77,9 @@ public class SignUp extends Activity implements OnClickListener {
 		httpclient = new DefaultHttpClient();
 		
 		//create a new http post with url to php file as param
-		httppost = new HttpPost("http://152.46.20.47/android/signup.php");
+		httppost = new HttpPost("http://152.46.19.183/android/signup.php");
 		
-		Log.i("pratik","connection done");
+		Log.i(TAG,"connection done");
 		//assign input text to strings
 		uname = username.getText().toString();
 		passwd = password.getText().toString();
@@ -90,12 +88,14 @@ public class SignUp extends Activity implements OnClickListener {
 		if(uname.isEmpty() || passwd.isEmpty() || cpasswd.isEmpty()) {
 			Toast.makeText(getBaseContext(), "Fields cannot be empty !", Toast.LENGTH_SHORT).show();
 		}
-		if(passwd.equals(cpasswd)) {
-			new longOperation().execute("");
-		} else {
-			Toast.makeText(getBaseContext(), "Passwords do not match !", Toast.LENGTH_SHORT).show();
-			password.setText("");
-			cpassword.setText("");
+		else {
+			if(passwd.equals(cpasswd)) {
+				new longOperation().execute("");
+			} else {
+				Toast.makeText(getBaseContext(), "Passwords do not match !", Toast.LENGTH_SHORT).show();
+				password.setText("");
+				cpassword.setText("");
+			}
 		}
 		
 	}
@@ -116,20 +116,20 @@ public class SignUp extends Activity implements OnClickListener {
 					nameValuePairs.add(new BasicNameValuePair("uname", uname));
 					nameValuePairs.add(new BasicNameValuePair("passwd", passwd));
 					
-					Log.i("pratik","inside try");
+					Log.i(TAG,"inside try");
 					//add array to http post
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 					
-					Log.i("pratik","urlcrap");
+					Log.i(TAG,"url");
 					//assign executed  from container to response
 					response = httpclient.execute(httppost);
 					
-					Log.i("pratik","responsecrap");
+					Log.i(TAG,"response");
 					//need to check if status code is 200
 					if(response.getStatusLine().getStatusCode() == 200)
 					{
 					
-						Log.i("pratik","inside status loop");
+						Log.i(TAG,"inside status loop");
 											
 						//assign response entity to http entity
 						entity = response.getEntity();
@@ -171,9 +171,11 @@ public class SignUp extends Activity implements OnClickListener {
 					}
 					
 				} catch(Exception e) {
-					Log.i("pratik",e.toString());
-					//Toast.makeText(getBaseContext(), "Connected failed!", Toast.LENGTH_SHORT).show();
-					result = 2;
+					Log.i(TAG,e.toString());
+					if(e.toString().contains("HttpHostConnectException")) {
+						result = 2;
+					}
+
 				}
 				return result;
 			}
@@ -189,7 +191,7 @@ public class SignUp extends Activity implements OnClickListener {
 					Toast.makeText(getBaseContext(), "Something went wrong! Please enter again", Toast.LENGTH_SHORT).show();
 					break;
 				case 2:
-					Toast.makeText(getBaseContext(), "Connection Failed! Please try again", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getBaseContext(), "Cannot connect to server !", Toast.LENGTH_SHORT).show();
 					break;
 				case 3:
 					Toast.makeText(getBaseContext(), "Username already exists! Please choose a different one", Toast.LENGTH_SHORT).show();
