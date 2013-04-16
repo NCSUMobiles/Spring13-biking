@@ -82,11 +82,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/listitembg"
-
-        android:visibility="invisible" >
-
+        android:layout_alignParentTop="true" 
+        android:visibility="invisible" 
+        android:background="@drawable/bottom_curved_dark_bg">
     </ListView>
 
+    <ProgressBar
+        android:id="@+id/progressBarWeather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" 
+        android:visibility="invisible" />
 </RelativeLayout>

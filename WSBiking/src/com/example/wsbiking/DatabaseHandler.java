@@ -110,7 +110,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				+ ROUTEID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME
 				+ " TEXT," + DESCRIPTION + " TEXT," + AVGSPEED + " REAL,"
 				+ DISTANCE + " REAL," + STARTTIME + " TEXT," + ENDTIME
-				+ " TEXT); ";
+				+ " TEXT," +USERID+" TEXT,"+ ISINSYNC + " INTEGER); ";
 
 		String CREATE_ROUTE_POINTS_TABLE = "CREATE TABLE " + TABLE_ROUTE_POINTS
 				+ "(" + ROUTEID + " INTEGER," + LATITUDE + " REAL," + LONGITUDE
@@ -145,6 +145,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
+	//TODO: TEST code to alter table, remove later
 	/**
 	 * Update routes table to add user name and sync column
 	 * 

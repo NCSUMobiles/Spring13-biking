@@ -98,15 +98,13 @@ public class Main extends Activity {
     private void updateView() {
         Session session = Session.getActiveSession();
         if (session.isOpened()) {
-            //FLogin.setText(R.string.logout);
-        	Log.i("face","inside update view is opened");
+            Log.i("face","inside update view is opened");
             NLogin.setEnabled(false);
             FLogin.setOnClickListener(new OnClickListener() {
                 public void onClick(View view) { onClickLogout(); }
             });
             callHome();
         } else {
-            //FLogin.setText(R.string.login);
             NLogin.setEnabled(true);
             FLogin.setOnClickListener(new OnClickListener() {
                 public void onClick(View view) { onClickLogin();  }
@@ -115,8 +113,7 @@ public class Main extends Activity {
         
         Log.i("pratik", "hello" + Main.isLogin);
         if (Main.isLogin) {
-        	FLogin.setEnabled(false);
-        	//NLogin.setText(R.string.nlogout);
+        	FLogin.setEnabled(false);        	
         }
     }
     

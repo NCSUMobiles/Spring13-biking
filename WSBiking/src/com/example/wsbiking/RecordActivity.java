@@ -27,6 +27,8 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +77,7 @@ public class RecordActivity extends FragmentActivity implements
 	private static final float ROUTEWIDTH = 10.0f;
 	private static final int ROUTECOLOR = 0x7F0000FF;
 	private static final String LOG_TAB = "Record activity";
-	private static final int SECS = 7;
+	private static final int SECS = 5;
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -125,13 +127,13 @@ public class RecordActivity extends FragmentActivity implements
 
 		setUpMapIfNeeded();
 
-//		LoggedUser = (EditText) findViewById(R.id.LoggedUser);
-//		if (Main.isLogin) {
-//			LoggedUser.setText(Main.logged_user);
-//		} else {
-//			session = Session.getActiveSession();
-//			setName(session);
-//		}
+		// LoggedUser = (EditText) findViewById(R.id.LoggedUser);
+		// if (Main.isLogin) {
+		// LoggedUser.setText(Main.logged_user);
+		// } else {
+		// session = Session.getActiveSession();
+		// setName(session);
+		// }
 	}
 
 	@Override
@@ -292,11 +294,13 @@ public class RecordActivity extends FragmentActivity implements
 
 	@Override
 	public void gotWeatherInfo(StoreInfo storeInfo) {
-		
+
 		ArrayList<StoreInfo> weather = new ArrayList<StoreInfo>();
 		if (storeInfo != null) {
-			
-			for(int i=0;i<5;i++){
+
+			handler.removeCallbacks(runnable);
+
+			for (int i = 0; i < 5; i++) {
 				StoreInfo temp = new StoreInfo();
 				temp.setCondition(storeInfo.getCondition(i), 0);
 				temp.setTemp(storeInfo.getTemp(i), 0);
@@ -304,36 +308,39 @@ public class RecordActivity extends FragmentActivity implements
 				temp.setTime(storeInfo.getTime(i), 0);
 				weather.add(temp);
 			}
-			
-			WeatherAdapter adapter = new WeatherAdapter(this, R.layout.singleweather, weather);
+
+			WeatherAdapter adapter = new WeatherAdapter(this,
+					R.layout.singleweather, weather);
 			ListView weatherList = (ListView) findViewById(R.id.weatherList);
 			weatherList.setAdapter(adapter);
-			weatherList.setVisibility(View.VISIBLE);			
-			
-		}
-		else{
-			
+
+			ProgressBar loadingWeather = (ProgressBar) findViewById(R.id.progressBarWeather);
+			loadingWeather.setVisibility(View.INVISIBLE);
+
+			weatherList.setVisibility(View.VISIBLE);
+
+			handler.postDelayed(runnable, SECS * 1000);
+		} else {
+
 		}
 
 	}
+
 	public void displayWeather() {
 		ListView weatherList = (ListView) findViewById(R.id.weatherList);
+		ProgressBar loadingWeather = (ProgressBar) findViewById(R.id.progressBarWeather);
 
-		handler.removeCallbacks(runnable);
+		if (loadingWeather.getVisibility() == View.INVISIBLE) {
+			if (weatherList.isShown()) {
+				weatherList.setVisibility(View.INVISIBLE);		
+			} else {
+				String latlong[] = { "35.7719", "-78.6389" };
 
-		
-		
-		if (weatherList.isShown()) {
-			weatherList.setVisibility(View.INVISIBLE);
-		} else {
-			String latlong[] = { "35.7719", "-78.6389" };
-			weatherList.setVisibility(View.VISIBLE);
-			
-			WeatherProcessing weatherProcessor = new WeatherProcessing();
-			weatherProcessor.queryYahooWeather(getApplicationContext(),
-					latlong, this);
-
-			handler.postDelayed(runnable, SECS * 1000);
+				loadingWeather.setVisibility(View.VISIBLE);
+				WeatherProcessing weatherProcessor = new WeatherProcessing();
+				weatherProcessor.queryYahooWeather(getApplicationContext(),
+						latlong, this);
+			}
 		}
 	}
 
@@ -502,9 +509,9 @@ public class RecordActivity extends FragmentActivity implements
 
 				routePoints.add(new RoutePoint(lastLocation.getLatitude(),
 						lastLocation.getLongitude()));
-				
+
 				plotMyLocationMarker(DEFAULTZOOM, DEFAULTZOOM, lastKnown);
-				
+
 				// Timer will only start after first start point
 				timer.start();
 				timer.setBase(SystemClock.elapsedRealtime());
@@ -603,7 +610,7 @@ public class RecordActivity extends FragmentActivity implements
 		btnMyLoc.setVisibility(View.VISIBLE);
 		distance.setVisibility(View.INVISIBLE);
 	}
-	
+
 	/**
 	 * Returns average speed in terms of miler per hour
 	 * 

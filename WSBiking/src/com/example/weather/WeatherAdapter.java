@@ -53,19 +53,16 @@ public class WeatherAdapter extends ArrayAdapter<StoreInfo> {
 					.findViewById(R.id.txtVwRouteIndex);*/
 			holder.txtVwWeatherTemp = (TextView) row.findViewById(R.id.txtVwWeatherTemp);
 			holder.imgBtnShowMap = (ImageView) row
-					.findViewById(R.id.imgBtnShowMap1);
+					.findViewById(R.id.imgWeatherThumbnail);
 			row.setTag(holder);
 		} else {
 			holder = (RouteHolder) row.getTag();
 		}
 
 		StoreInfo wea = weather.get(position);
-		holder.txtVwWeatherTime.setTextColor(Color.GRAY);
 		holder.txtVwWeatherTime.setText(wea.getTime(0) );
-		holder.TxtVwWeatherDesc.setTextColor(Color.DKGRAY);
 		holder.TxtVwWeatherDesc.setText(wea.getCondition(0));
 		holder.txtVwWeatherTemp.setText(wea.getTemp(0)+ " F");
-	//	holder.txtVwTemp.setText(route.getTemp(0));
 		holder.imgBtnShowMap.setBackground(wea.getImg(0));
 		return row;
 	}
