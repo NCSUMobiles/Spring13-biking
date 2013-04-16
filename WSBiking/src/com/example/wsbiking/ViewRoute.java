@@ -11,7 +11,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -136,16 +135,14 @@ public class ViewRoute extends FragmentActivity {
 			mapUI = mMap.getUiSettings();
 			mapUI.setZoomControlsEnabled(false);
 
-			Intent viewRouteActivity = getIntent();
+			Bundle intentData = getIntent().getExtras();
+			Route route = intentData.getParcelable("routeDetails");
 
-			this.routeID = Integer.valueOf(viewRouteActivity
-					.getStringExtra("routeID"));
-			this.totalDistance = Float.valueOf(viewRouteActivity
-					.getStringExtra("totalDistance"));
-			this.avgSpeed = Float.valueOf(viewRouteActivity
-					.getStringExtra("avgSpeed"));
-			this.startTime = viewRouteActivity.getStringExtra("startTime");
-			this.endtime = viewRouteActivity.getStringExtra("endTime");
+			this.routeID = route.getID();
+			this.totalDistance = route.getDistance();
+			this.avgSpeed = route.getSpeed();
+			this.startTime = route.getStartTime();
+			this.endtime = route.getEndTime();
 
 			Cursor resultSet = dbHandler.getRoutePoints(this.routeID);
 
@@ -162,7 +159,8 @@ public class ViewRoute extends FragmentActivity {
 					rectOptions.add(new LatLng(resultSet.getDouble(LATITUDE),
 							resultSet.getDouble(LONGITUDE)));
 
-					if (routeMid == null && resultSet.getPosition() == resultSet.getCount() / 2)
+					if (routeMid == null
+							&& resultSet.getPosition() == resultSet.getCount() / 2)
 						routeMid = new LatLng(resultSet.getDouble(LATITUDE),
 								resultSet.getDouble(LONGITUDE));
 

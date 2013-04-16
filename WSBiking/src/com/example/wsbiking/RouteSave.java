@@ -57,25 +57,19 @@ public class RouteSave extends Activity {
 			routeTitle = this.startTime.toString() + " "
 					+ this.endtime.toString();
 
-		if (dbHandler
-				.addRoute(this.routePoints, routeTitle, routeDesc,
-						this.totalDistance, this.avgSpeed, this.startTime,
-						this.endtime) > 0) {
+		Route route = new Route(this.routePoints, null, routeTitle, routeDesc,
+				this.avgSpeed, this.totalDistance, this.startTime,
+				this.endtime, Main.logged_user);
 
-			Toast toast = Toast.makeText(getApplicationContext(),
-					"Route Saved", Toast.LENGTH_SHORT);
-
-			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-			toast.show();
+		int routeID = dbHandler.addRoute(route);
+		
+		//TODO: Server call to save route to server and also send all pending routes that aren't synced
+		
+		if (routeID > 0) {
+			showToast("Route Saved");
 		} else {
-			Toast toast = Toast.makeText(getApplicationContext(),
-					"Route couldn't be saved", Toast.LENGTH_SHORT);
-
-			toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
-			toast.show();
+			showToast("Route couldn't be saved");
 		}
-
-		this.setResult(Activity.RESULT_OK, null);
 
 		dbHandler.close();
 		super.onStop();
@@ -105,6 +99,19 @@ public class RouteSave extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.route_save, menu);
 		return true;
+	}
+
+	/**
+	 * generic method to display toast
+	 * 
+	 * @param message
+	 */
+	private void showToast(String message) {
+		Toast toast = Toast.makeText(getApplicationContext(), message,
+				Toast.LENGTH_SHORT);
+
+		toast.setGravity(Gravity.CENTER | Gravity.CENTER_HORIZONTAL, 0, 0);
+		toast.show();
 	}
 
 	private class textChangedListener implements TextWatcher {

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -26,6 +25,7 @@ public class ViewRoutes extends Activity {
 	// Log tag for logging errors
 	private static final String LOG_TAG = "View Routes Activity";
 
+	ArrayList<Route> routes;
 	private DatabaseHandler dbHandler;
 
 	@Override
@@ -40,12 +40,13 @@ public class ViewRoutes extends Activity {
 	 * Populates the routes list
 	 */
 	private void populateList() {
-		ArrayList<Route> routes = dbHandler.getRoutes();
+
+		this.routes = dbHandler.getRoutes(Main.logged_user);
 
 		try {
 			if (routes != null) {
 				RouteAdapter adapter = new RouteAdapter(this,
-						R.layout.singleroute, routes);
+						R.layout.singleroute, this.routes);
 
 				ListView routesListView = (ListView) findViewById(R.id.routesList);
 				routesListView.setAdapter(adapter);
@@ -68,21 +69,6 @@ public class ViewRoutes extends Activity {
 		getMenuInflater().inflate(R.menu.view_routes, menu);
 		return true;
 	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.heatmap:
-			Intent intent = new Intent(this, Heatmap.class);
-			startActivity(intent);
-			break;
-		
-		default:
-			break;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Launch view route activity o plot route on map and show route details
@@ -90,27 +76,16 @@ public class ViewRoutes extends Activity {
 	 * @param showButton
 	 */
 	public void showRouteOnMap(View showButton) {
-
 		try {
 			View rowContainer = (View) showButton.getParent().getParent();
 
-			TextView txtVwRouteID = (TextView) rowContainer
-					.findViewById(R.id.txtVwRouteID);
-			TextView txtVwSpeed = (TextView) rowContainer
-					.findViewById(R.id.txtVwSpeed);
-			TextView txtVwDistance = (TextView) rowContainer
-					.findViewById(R.id.txtVwDistance);
-			TextView txtVwStartTime = (TextView) rowContainer
-					.findViewById(R.id.txtVwStartTime);
-			TextView txtVwEndTime = (TextView) rowContainer
-					.findViewById(R.id.txtVwEndTime);
+			TextView txtVwRouteIndex = (TextView) rowContainer
+					.findViewById(R.id.txtVwRouteIndex);
 
 			Intent intent = new Intent(this, ViewRoute.class);
-			intent.putExtra("routeID", txtVwRouteID.getText());
-			intent.putExtra("totalDistance", txtVwDistance.getText());
-			intent.putExtra("avgSpeed", txtVwSpeed.getText());
-			intent.putExtra("startTime", txtVwStartTime.getText());
-			intent.putExtra("endTime", txtVwEndTime.getText());
+			
+			intent.putExtra("routeDetails", this.routes.get(Integer
+					.valueOf(txtVwRouteIndex.getText().toString())));			
 
 			startActivity(intent);
 		} catch (Exception ex) {

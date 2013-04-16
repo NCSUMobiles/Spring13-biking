@@ -43,41 +43,12 @@
         android:text="@string/route_title_description_text" />
 
     <TextView
-        android:id="@+id/txtVwRouteID"
+        android:id="@+id/txtVwRouteIndex"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/listItemTitle"
         android:layout_alignBottom="@+id/listItemTitle"
         android:layout_toRightOf="@+id/listItemTitle"
         android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/txtVwSpeed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/TxtVwRouteDesc"
-        android:layout_marginLeft="10dp"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/txtVwDistance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/TxtVwRouteDesc"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/txtVwStartTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/TxtVwRouteDesc"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/txtVwEndTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/TxtVwRouteDesc"
-        android:visibility="invisible" />
-
+       
 </RelativeLayout>

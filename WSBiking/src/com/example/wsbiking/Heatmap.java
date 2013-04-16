@@ -69,29 +69,41 @@ public class Heatmap extends Activity {
 			StringBuilder pointsString = new StringBuilder("[");
 
 			try {
-				Cursor pointsCursor = dbHandler.getEveryLatLong();
+				Cursor pointsCursor = dbHandler
+						.getEveryLatLong(Main.logged_user);
 
-				if (pointsCursor != null && pointsCursor.moveToFirst()) {
+				if (pointsCursor != null) {
 
-					while (!pointsCursor.isAfterLast()) {
-						pointsString.append(String.format(GOOGLE_MAP_POINT,
-								pointsCursor.getDouble(LATITUDE),
-								pointsCursor.getDouble(LONGITUDE)));
+					if (pointsCursor.moveToFirst()) {
+						while (!pointsCursor.isAfterLast()) {
+							pointsString.append(String.format(GOOGLE_MAP_POINT,
+									pointsCursor.getDouble(LATITUDE),
+									pointsCursor.getDouble(LONGITUDE)));
 
-						pointsCursor.moveToNext();
+							pointsCursor.moveToNext();
+
+						}
 					}
 
 					pointsCursor.close();
 				}
 			} catch (Exception ex) {
 				Log.e(LOG_TAB, ex.getMessage());
+				pointsString.append("ERROR_");
 			}
 
-			return pointsString.substring(0, pointsString.length() - 1) + "]";
+			if(pointsString.length() > GOOGLE_MAP_POINT.length())
+				return pointsString.substring(0, pointsString.length() - 1) + "]";
+			else
+				return "NODATA";
 		}
 
 		public void errorInPoints() {
 			showToast("Unable to plot heatmap of route points");
+		}
+		
+		public void noRoutePoints() {
+			showToast("No route points to plot heatmap");
 		}
 	}
 

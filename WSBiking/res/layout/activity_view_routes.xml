@@ -39,7 +39,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:text="@string/no_routes"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textSize="24sp" />
     </RelativeLayout>
 

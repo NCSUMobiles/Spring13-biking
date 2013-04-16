@@ -13,8 +13,9 @@ import android.widget.TextView;
 
 /**
  * Route adapter class to populate listview of routes
+ * 
  * @author Leon Dmello
- *
+ * 
  */
 public class RouteAdapter extends ArrayAdapter<Route> {
 	private Context context;
@@ -43,18 +44,10 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 					.findViewById(R.id.txtVwRouteTitle);
 			holder.TxtVwRouteDesc = (TextView) row
 					.findViewById(R.id.TxtVwRouteDesc);
-			holder.txtVwRouteID = (TextView) row
-					.findViewById(R.id.txtVwRouteID);
+			holder.txtVwRouteIndex = (TextView) row
+					.findViewById(R.id.txtVwRouteIndex);
 			holder.imgBtnShowMap = (ImageView) row
 					.findViewById(R.id.imgBtnShowMap);
-			holder.txtVwSpeed = (TextView) row.findViewById(R.id.txtVwSpeed);
-			holder.txtVwDistance = (TextView) row
-					.findViewById(R.id.txtVwDistance);
-			holder.txtVwStartTime = (TextView) row
-					.findViewById(R.id.txtVwStartTime);
-			holder.txtVwEndTime = (TextView) row
-					.findViewById(R.id.txtVwEndTime);
-
 			row.setTag(holder);
 		} else {
 			holder = (RouteHolder) row.getTag();
@@ -64,11 +57,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 
 		holder.txtVwRouteTitle.setText(route.getTitle());
 		holder.TxtVwRouteDesc.setText(route.getDescription());
-		holder.txtVwRouteID.setText(String.valueOf(route.getID()));
-		holder.txtVwSpeed.setText(String.valueOf(route.getSpeed()));
-		holder.txtVwDistance.setText(String.valueOf(route.getDistance()));
-		holder.txtVwStartTime.setText(String.valueOf(route.getStartTime()));
-		holder.txtVwEndTime.setText(String.valueOf(route.getEndTime()));
+		holder.txtVwRouteIndex.setText(String.valueOf(position));
 
 		return row;
 	}
@@ -76,11 +65,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 	static class RouteHolder {
 		TextView txtVwRouteTitle;
 		TextView TxtVwRouteDesc;
-		TextView txtVwRouteID;
+		TextView txtVwRouteIndex;
 		ImageView imgBtnShowMap;
-		TextView txtVwSpeed;
-		TextView txtVwDistance;
-		TextView txtVwStartTime;
-		TextView txtVwEndTime;
 	}
 }

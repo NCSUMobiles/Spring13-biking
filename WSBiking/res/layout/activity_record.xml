@@ -89,12 +89,4 @@
         android:textSize="16sp" 
         android:visibility="invisible"/>
 
-    <EditText
-        android:id="@+id/LoggedUser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:visibility="invisible" />
-
 </RelativeLayout>

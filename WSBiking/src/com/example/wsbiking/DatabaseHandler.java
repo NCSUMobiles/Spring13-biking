@@ -48,6 +48,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	private static final String DISTANCE = "distance";
 	private static final String STARTTIME = "startTime";
 	private static final String ENDTIME = "endTime";
+	private static final String USERID = "userID";
+	private static final String ISINSYNC = "isInSync";
 
 	// Routes Table Column indexes
 	private static final Integer ROUTEIDINDEX = 0;
@@ -57,6 +59,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	private static final Integer DISTANCEINDEX = 4;
 	private static final Integer STARTTIMEINDEX = 5;
 	private static final Integer ENDTIMEINDEX = 6;
+	private static final Integer USERIDINDEX = 7;
 
 	// Route points Table Columns names
 	private static final String LATITUDE = "latitude";
@@ -125,18 +128,47 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	// Upgrading database
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		String DROP_TABLES = "DROP TABLE IF EXISTS " + TABLE_ROUTE_POINTS
-				+ "; " + "DROP TABLE IF EXISTS " + TABLE_ROUTES + "; ";
+		String DROP_ROUTE_TABLE = "DROP TABLE IF EXISTS " + TABLE_ROUTES + "; ";
+
+		String DROP_ROUTE_POINTS_TABLE = "DROP TABLE IF EXISTS "
+				+ TABLE_ROUTE_POINTS + "; ";
 		// Drop older table if existed
 
 		try {
-			db.execSQL(DROP_TABLES);
+			db.execSQL(DROP_ROUTE_TABLE);
+			db.execSQL(DROP_ROUTE_POINTS_TABLE);
 		} catch (Exception ex) {
 			Log.e(LOG_TAG, "Failed to drop tables: " + ex.getMessage());
 		}
 
 		// Create tables again
 		onCreate(db);
+	}
+
+	/**
+	 * Update routes table to add user name and sync column
+	 * 
+	 * @param userName
+	 */
+	public void alterTable(String userName) {
+		String ALTER_TABLE = "ALTER TABLE " + TABLE_ROUTES + " ADD COLUMN "
+				+ USERID + " TEXT;";
+		String ALTER_TABLE2 = "ALTER TABLE " + TABLE_ROUTES + " ADD COLUMN "
+				+ ISINSYNC + " INTEGER;";
+		String UPDATE_TABLE = "UPDATE " + TABLE_ROUTES + " SET " + USERID
+				+ "='" + userName + "', " + ISINSYNC + "=0";
+		try {
+
+			SQLiteDatabase db = this.getWritableDatabase();
+			db.execSQL(ALTER_TABLE);
+			db.execSQL(ALTER_TABLE2);
+			db.execSQL(UPDATE_TABLE);
+
+		} catch (Exception ex) {
+			Log.e(LOG_TAG,
+					"Failed to alter route table and values: "
+							+ ex.getMessage());
+		}
 	}
 
 	/**
@@ -160,9 +192,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 	// Create a new route entry
-	public Integer addRoute(ArrayList<RoutePoint> routePoints, String name,
-			String description, float distance, float avgSpeed,
-			String startTime, String endTime) {
+	public Integer addRoute(Route route) {
 
 		Integer insertedRowID = 0;
 
@@ -171,12 +201,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			SQLiteDatabase db = this.getWritableDatabase();
 
 			ContentValues values = new ContentValues();
-			values.put(NAME, name);
-			values.put(DESCRIPTION, description);
-			values.put(DISTANCE, distance);
-			values.put(AVGSPEED, avgSpeed);
-			values.put(STARTTIME, startTime);
-			values.put(ENDTIME, endTime);
+			values.put(NAME, route.getTitle());
+			values.put(DESCRIPTION, route.getDescription());
+			values.put(DISTANCE, route.getDistance());
+			values.put(AVGSPEED, route.getSpeed());
+			values.put(STARTTIME, route.getStartTime());
+			values.put(ENDTIME, route.getEndTime());
+			values.put(USERID, route.getUserID());
+			values.put(ISINSYNC, 0);
 
 			// Inserting Row
 			insertedRowID = (int) db.insert(TABLE_ROUTES, null, values);
@@ -184,7 +216,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			if (insertedRowID == -1)
 				throw new Exception("Failed to insert Route entry");
 
-			if (!insertRoutePoints(routePoints, insertedRowID)) {
+			if (!insertRoutePoints(route.getPoints(), insertedRowID)) {
 				deleteRoute(insertedRowID);
 				insertedRowID = -1;
 			}
@@ -248,7 +280,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public ArrayList<Route> getRoutes() {
+	public ArrayList<Route> getRoutes(String userName) {
 
 		// TODO: Need to include user ID in table as well
 		Cursor cursor = null;
@@ -258,9 +290,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 			SQLiteDatabase db = this.getWritableDatabase();
 
-			cursor = db.query(TABLE_ROUTES, new String[] { ROUTEID, NAME,
-					DESCRIPTION, AVGSPEED, DISTANCE, STARTTIME, ENDTIME },
-					null, null, null, null, null);
+			cursor = db
+					.query(TABLE_ROUTES,
+							new String[] { ROUTEID, NAME, DESCRIPTION,
+									AVGSPEED, DISTANCE, STARTTIME, ENDTIME },
+							USERID + "= ?", new String[] { userName }, null,
+							null, null);
 
 			if (cursor.moveToLast()) {
 
@@ -280,8 +315,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 					routeStart = cursor.getString(STARTTIMEINDEX);
 					routeEnd = cursor.getString(ENDTIMEINDEX);
 
-					allRoutes.add(new Route(routeID, routeName, routeDesc,
-							routeSpeed, routeDistance, routeStart, routeEnd));
+					allRoutes.add(new Route(null, routeID, routeName,
+							routeDesc, routeSpeed, routeDistance, routeStart,
+							routeEnd, userName));
 
 					cursor.moveToPrevious();
 				}
@@ -325,22 +361,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return cursor;
 	}
 
-	//TODO: Need to include user ID in call as well
+	// TODO: Need to include user ID in call as well
 	/**
 	 * Get's all Lat Long points from table
 	 * 
 	 * @return
 	 */
-	public Cursor getEveryLatLong() {
+	public Cursor getEveryLatLong(String userName) {
 		Cursor cursor = null;
+		String sqlString = "SELECT " + LATITUDE + "," + LONGITUDE + " FROM "
+				+ TABLE_ROUTE_POINTS + "," + TABLE_ROUTES + " WHERE "
+				+ TABLE_ROUTE_POINTS + "." + ROUTEID + "=" + TABLE_ROUTES + "."
+				+ ROUTEID + " AND " + TABLE_ROUTES + "." + USERID + "=?";
 
 		try {
-
 			SQLiteDatabase db = this.getWritableDatabase();
-
-			cursor = db.query(TABLE_ROUTE_POINTS, new String[] { LATITUDE,
-					LONGITUDE }, null, null, null, null, null);
-
+			cursor = db.rawQuery(sqlString, new String[] { userName });
 		} catch (Exception ex) {
 			Log.e(LOG_TAG, "Failed to get all points from points table table: "
 					+ ex.getMessage());

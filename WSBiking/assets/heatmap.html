@@ -28,8 +28,18 @@
             var defaultCenter = new google.maps.LatLng(35.77408384522975, -78.68477348302066);
 
             try {
-                heatmapData = eval(Android.getPointsData());
-                defaultCenter = heatmapData[0];
+
+                var response = Android.getPointsData();
+
+                if (response.search("ERROR") < 0) {
+                    if (response.search("NODATA") < 0) {
+                        heatmapData = eval(response);
+                        defaultCenter = heatmapData[0];
+                    }
+                    else {
+                        heatmapData = [];
+                    }
+                }
             }
             catch (ex) {
             }
@@ -47,11 +57,16 @@
                 mapOptions);
 
             if (heatmapData !== null) {
-                var heatmap = new google.maps.visualization.HeatmapLayer({
-                    data: heatmapData
-                });
+                if (heatmapData.length > 0) {
+                    var heatmap = new google.maps.visualization.HeatmapLayer({
+                        data: heatmapData
+                    });
 
-                heatmap.setMap(map);
+                    heatmap.setMap(map);
+                }
+                else {
+                    Android.noRoutePoints();
+                }
             }
             else {
                 Android.errorInPoints();

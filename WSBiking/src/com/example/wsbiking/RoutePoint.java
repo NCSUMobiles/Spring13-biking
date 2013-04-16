@@ -57,5 +57,4 @@ public class RoutePoint implements Parcelable {
 			return new RoutePoint[size];
 		}
 	};
-
 }
