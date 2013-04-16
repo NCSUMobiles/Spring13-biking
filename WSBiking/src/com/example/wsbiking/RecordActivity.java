@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,9 +26,14 @@ import android.view.View;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.weather.StoreInfo;
+import com.example.weather.WeatherAdapter;
+import com.example.weather.WeatherProcessing;
+import com.example.weather.WeatherInfoListener;
 import com.example.wsbiking.R;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -43,9 +49,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.FragmentActivity;
 
-import com.example.yweather.StoreInfo;
-import com.example.yweather.WeatherProcessing;
-import com.example.yweather.YahooWeatherInfoListener;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -60,7 +63,7 @@ import com.facebook.model.GraphUser;
  * 
  */
 public class RecordActivity extends FragmentActivity implements
-		YahooWeatherInfoListener {
+		WeatherInfoListener {
 
 	/**
 	 * Constants used in this file
@@ -72,7 +75,7 @@ public class RecordActivity extends FragmentActivity implements
 	private static final float ROUTEWIDTH = 10.0f;
 	private static final int ROUTECOLOR = 0x7F0000FF;
 	private static final String LOG_TAB = "Record activity";
-	private static final int SECS = 5;
+	private static final int SECS = 7;
 
 	/**
 	 * Note that this may be null if the Google Play services APK is not
@@ -289,29 +292,43 @@ public class RecordActivity extends FragmentActivity implements
 
 	@Override
 	public void gotWeatherInfo(StoreInfo storeInfo) {
-
+		
+		ArrayList<StoreInfo> weather = new ArrayList<StoreInfo>();
 		if (storeInfo != null) {
-			TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
-			tv.setText(storeInfo.getCity() + ", " + storeInfo.getCountry()
-					+ "\n\n" + "Current Weather: " + storeInfo.getTemperature()
-					+ " F" + "\n" + "Weather Condition : "
-					+ storeInfo.getmCurrentText() + "\n" + "Humidity: "
-					+ storeInfo.getHumidity());
+			
+			for(int i=0;i<5;i++){
+				StoreInfo temp = new StoreInfo();
+				temp.setCondition(storeInfo.getCondition(i), 0);
+				temp.setTemp(storeInfo.getTemp(i), 0);
+				temp.setImg(storeInfo.getImg(i), 0);
+				temp.setTime(storeInfo.getTime(i), 0);
+				weather.add(temp);
+			}
+			
+			WeatherAdapter adapter = new WeatherAdapter(this, R.layout.singleweather, weather);
+			ListView weatherList = (ListView) findViewById(R.id.weatherList);
+			weatherList.setAdapter(adapter);
+			weatherList.setVisibility(View.VISIBLE);			
+			
+		}
+		else{
+			
 		}
 
 	}
-
 	public void displayWeather() {
-		TextView tv = (TextView) findViewById(R.id.textViewWeatherInfo);
+		ListView weatherList = (ListView) findViewById(R.id.weatherList);
 
 		handler.removeCallbacks(runnable);
 
-		if (tv.isShown()) {
-			tv.setVisibility(View.INVISIBLE);
+		
+		
+		if (weatherList.isShown()) {
+			weatherList.setVisibility(View.INVISIBLE);
 		} else {
 			String latlong[] = { "35.7719", "-78.6389" };
-			tv.setVisibility(View.VISIBLE);
-			tv.setText("Loading..");
+			weatherList.setVisibility(View.VISIBLE);
+			
 			WeatherProcessing weatherProcessor = new WeatherProcessing();
 			weatherProcessor.queryYahooWeather(getApplicationContext(),
 					latlong, this);
@@ -446,7 +463,7 @@ public class RecordActivity extends FragmentActivity implements
 
 			startTime = new Date();
 
-			TextView weatherInfo = (TextView) findViewById(R.id.textViewWeatherInfo);
+			ListView weatherList = (ListView) findViewById(R.id.weatherList);
 			Chronometer timer = (Chronometer) findViewById(R.id.tripTimer);
 			TextView distance = (TextView) findViewById(R.id.tripDistance);
 			ImageView btnStop = (ImageView) findViewById(R.id.stop_button);
@@ -508,7 +525,7 @@ public class RecordActivity extends FragmentActivity implements
 			btnStart.setVisibility(View.INVISIBLE);
 			btnStop.setVisibility(View.VISIBLE);
 			btnMyLoc.setVisibility(View.INVISIBLE);
-			weatherInfo.setVisibility(View.INVISIBLE);
+			weatherList.setVisibility(View.INVISIBLE);
 		} else {
 			showToast("Please enable GPS to record");
 		}

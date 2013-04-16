@@ -1,4 +1,4 @@
-package com.example.yweather;
+package com.example.weather;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,26 +19,27 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
 public class WeatherProcessing {
-	private String WOEID;
-	private YahooWeatherInfoListener weatherInfoListener;
+	private WeatherInfoListener weatherInfoListener;
 
-	public void queryYahooWeather(Context context, String[] latLong, YahooWeatherInfoListener result) {
+	public void queryYahooWeather(Context context, String[] latLong, WeatherInfoListener result) {
 		weatherInfoListener = result;
 		WeatherQueryTask task = new WeatherQueryTask();
 		task.setContext(context);
 		task.execute(latLong);
 	}
 
-	public String getWeather(Context context, String WOEID){
+	public String getWeather(Context context, String[] latlong){
 		String qResult = "";
-		String queryString = "http://weather.yahooapis.com/forecastrss?w=" +  WOEID;
+		String queryString = "http://api.wunderground.com/api/950884302095eee4/hourly/q/" + latlong[0] +"," + latlong[1]+ ".xml";
 
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(queryString);
@@ -97,25 +99,22 @@ public class WeatherProcessing {
 		StoreInfo storeInfo = new StoreInfo();
 		try {
 			
-			Node titleNode = doc.getElementsByTagName("title").item(0);
+			int i =0;
+			Node node1, node2;
+			NodeList nodeList;
 			
-			if(titleNode.getTextContent().equals("Yahoo! Weather - Error")) {
-				return null;
-			}			
-				
-			Node locationNode = doc.getElementsByTagName("yweather:location").item(0);
-			
-			storeInfo.setCity(locationNode.getAttributes().getNamedItem("city").getNodeValue());			
-			storeInfo.setCountry(locationNode.getAttributes().getNamedItem("country").getNodeValue());
-
-			Node atmosphereNode = doc.getElementsByTagName("yweather:atmosphere").item(0);
-			storeInfo.setHumidity(atmosphereNode.getAttributes().getNamedItem("humidity").getNodeValue());
-					
-			Node currentConditionNode = doc.getElementsByTagName("yweather:condition").item(0);
-
-			storeInfo.setmCurrentText(currentConditionNode.getAttributes().getNamedItem("text").getNodeValue());
-			storeInfo.setTemperature(Integer.parseInt(currentConditionNode.getAttributes().getNamedItem("temp").getNodeValue()));		
-			
+			for(i=0; i<5; i++){
+				node1 = doc.getElementsByTagName("forecast").item(i);
+				nodeList = node1.getChildNodes();
+				node2 = nodeList.item(1);
+				storeInfo.setTime(node2.getChildNodes().item(2).getTextContent() + ":" + node2.getChildNodes().item(3).getTextContent(), i); // Time
+				node2 = nodeList.item(3);
+				storeInfo.setTemp(node2.getChildNodes().item(1).getTextContent(), i); //Temperature
+				node2 = nodeList.item(7);
+				storeInfo.setCondition(node2.getTextContent(), i); // Condition
+				node2 = nodeList.item(11);
+				storeInfo.setImgURL(node2.getTextContent(), i); 
+			}
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 			Toast.makeText(context, "Parse XML failed - Unrecognized Tag", Toast.LENGTH_SHORT).show();
@@ -134,16 +133,22 @@ public class WeatherProcessing {
 
 		@Override
 		protected StoreInfo doInBackground(String... latLong) {
-			WOEIDProcessor woeidProcessor = new WOEIDProcessor();
-			WOEID = woeidProcessor.getWOEID(context, latLong[0], latLong[1]);			
-			if(!WOEID.equals("WOEID_NOT_FOUND")) {
-				String weather = getWeather(context, WOEID);
+				String weather = getWeather(context, latLong);
 				Document weatherDoc = convertStringToDocument(context, weather);
 				StoreInfo storeInfo = parseWeatherInfo(context, weatherDoc);
+				for(int i=0; i<=4; i++){
+				try {
+					storeInfo.setImg(Drawable.createFromStream(((java.io.InputStream)
+						      new java.net.URL(storeInfo.getImageURL(i)).getContent()), ""), i);
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				}
 				return storeInfo;
-			} else {
-				return null;
-			}
 		}
 		
 		@Override
