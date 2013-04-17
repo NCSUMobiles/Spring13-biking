@@ -33,6 +33,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -41,7 +42,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 	private static final String TAG = "NORMALLOGIN";
 	EditText etUser, etPass;
 	//Button bLogin;
-	ImageView bLogin;
+	ImageButton bLogin;
 	
 	//strings to save username and password
 	String username, password;
@@ -73,8 +74,9 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 		// TODO Auto-generated method stub
 		etUser = (EditText) findViewById(R.id.etUser);
 		etPass = (EditText) findViewById(R.id.etPass);
-		bLogin = (ImageView) findViewById(R.id.bSubmit);
-				
+		bLogin = (ImageButton) findViewById(R.id.bSubmit);
+		
+		etUser.setSingleLine();
 		Log.i(TAG,"inside initialize");
 		bLogin.setOnClickListener(this);
 	}

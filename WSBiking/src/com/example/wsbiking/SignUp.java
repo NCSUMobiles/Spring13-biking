@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class SignUp extends Activity implements OnClickListener {
 
 	private static final String TAG = "SIGNUP";
 	EditText username, password, cpassword;
-	ImageView signup;
+	ImageButton signup;
 	
 	//strings to save username and password
 	String uname, passwd, cpasswd;
@@ -66,8 +67,9 @@ public class SignUp extends Activity implements OnClickListener {
 		username = (EditText) findViewById(R.id.username);
 		password = (EditText) findViewById(R.id.password);
 		cpassword = (EditText) findViewById(R.id.cpassword);
-		signup = (ImageView) findViewById(R.id.signup);
+		signup = (ImageButton) findViewById(R.id.signup);
 		
+		username.setSingleLine();
 		progressbar = new ProgressDialog(SignUp.this);
 		
 		signup.setOnClickListener(this);

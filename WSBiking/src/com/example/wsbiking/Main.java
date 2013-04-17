@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.facebook.LoggingBehavior;
@@ -16,9 +17,9 @@ import com.facebook.Settings;
 
 public class Main extends Activity {
 
-	private ImageView FLogin;
-	private ImageView NLogin;
-	private ImageView signUp;
+	private ImageButton FLogin;
+	private ImageButton NLogin;
+	private ImageButton signUp;
 	
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	public static boolean isLogin = false;
@@ -30,9 +31,9 @@ public class Main extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		NLogin = (ImageView)findViewById(R.id.NLogin);
-		FLogin = (ImageView)findViewById(R.id.FLogin);
-		signUp = (ImageView) findViewById(R.id.SignUp);
+		NLogin = (ImageButton)findViewById(R.id.NLogin);
+		FLogin = (ImageButton)findViewById(R.id.FLogin);
+		signUp = (ImageButton) findViewById(R.id.SignUp);
 		//anon = (Button) findViewById(R.id.Anonymous);
 		
 		
@@ -137,6 +138,10 @@ public class Main extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        Session session1 = Session.getActiveSession();
+        if (session1.isOpened()) {
+        	callHome();
+        }
     }
 
     @Override

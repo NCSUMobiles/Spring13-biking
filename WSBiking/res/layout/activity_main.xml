@@ -21,37 +21,34 @@
          android:contentDescription="banner image"
          android:src="@drawable/bike" />
 
-     <ImageView
-         android:id="@+id/NLogin"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:layout_alignParentLeft="true"
-         android:layout_below="@+id/bike"
-         android:layout_marginTop="14dp"
-         android:clickable="true"
-         android:contentDescription="@string/login"
-         android:src="@drawable/nlogin" />
-
-     <ImageView
-         android:id="@+id/FLogin"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:layout_alignParentLeft="true"
-         android:layout_below="@+id/NLogin"
-         android:layout_marginTop="14dp"
-         android:clickable="true"
-         android:contentDescription="@string/login"
-         android:src="@drawable/login" />
-
-     <ImageView
+     <ImageButton
          android:id="@+id/SignUp"
-         android:layout_width="match_parent"
+         android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:layout_alignParentLeft="true"
          android:layout_below="@+id/FLogin"
-         android:layout_marginTop="14dp"
-         android:clickable="true"
-         android:contentDescription="signup"
-         android:src="@drawable/signup" />
+         android:layout_centerHorizontal="true"
+         android:layout_marginTop="16dp"
+         android:background="@drawable/signup_selector"
+         android:contentDescription="signup" />
+
+     <ImageButton
+         android:id="@+id/NLogin"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignLeft="@+id/SignUp"
+         android:layout_below="@+id/bike"
+         android:layout_marginTop="16dp"
+         android:background="@drawable/login_selector"
+         android:contentDescription="@string/login" />
+
+     <ImageButton
+         android:id="@+id/FLogin"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignRight="@+id/SignUp"
+         android:layout_below="@+id/NLogin"
+         android:layout_marginTop="16dp"
+         android:background="@drawable/fblogin_selector"
+         android:contentDescription="@string/login" />
 
 </RelativeLayout>
