@@ -160,15 +160,17 @@ public class RecordActivity extends FragmentActivity implements
 				spedit.clear();
 				spedit.commit();
 			}
-			Session session = Session.getActiveSession();
-			if (!session.isClosed()) {
-				Log.i("face", "in isClosed");
-				session.closeAndClearTokenInformation();
+			else {
+				Session session = Session.getActiveSession();
+				if (!session.isClosed()) {
+					Log.i(TAG, "in isClosed");
+					session.closeAndClearTokenInformation();
+				}
 			}
-			Intent intent1 = new Intent(this, Main.class);
-			intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-					| Intent.FLAG_ACTIVITY_NO_HISTORY);
-			startActivity(intent1);
+			Intent logout = new Intent(this, Main.class);
+			logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
+			startActivity(logout);
+			
 			break;
 		case R.id.weather:
 			displayWeather();

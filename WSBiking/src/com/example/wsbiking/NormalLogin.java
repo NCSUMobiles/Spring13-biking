@@ -4,7 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,11 +22,14 @@ import org.apache.http.NameValuePair;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
@@ -51,11 +59,13 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 	HttpResponse response;
 	HttpEntity entity;
 	
+	ProgressDialog progressbar;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_normal_login);
-		
+		progressbar = new ProgressDialog(NormalLogin.this);
 		initialize();
 	}
 
@@ -64,7 +74,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 		etUser = (EditText) findViewById(R.id.etUser);
 		etPass = (EditText) findViewById(R.id.etPass);
 		bLogin = (ImageView) findViewById(R.id.bSubmit);
-		
+				
 		Log.i(TAG,"inside initialize");
 		bLogin.setOnClickListener(this);
 	}
@@ -92,11 +102,25 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 		password = etPass.getText().toString();
 			
 		if(username.isEmpty() || password.isEmpty()){
-			Toast.makeText(getBaseContext(), "Fields cannot be empty !", Toast.LENGTH_SHORT).show();
+			Toast toast = Toast.makeText(getBaseContext(), "Fields cannot be empty !", Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+			toast.show();
 		}
 		else
 		{
+			username = md5hash(username);
+			password = md5hash(password);
+			
+			Log.i(TAG,"encry is "+md5hash(username));
+			
+			//ProgressDialog.show(NormalLogin.this, "Loading", "Connecting to server...");
+			
+			progressbar.setTitle("Please Wait");
+			progressbar.setMessage("Connecting to Server...");
+			progressbar.show();
+			
 			new longOperation().execute("");
+			//progressbar.dismiss();
 			Log.i(TAG, "hello" + Main.isLogin);
 		}
 	}
@@ -105,6 +129,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 	{
 		Intent intent = new Intent(this,RecordActivity.class);
 		intent.putExtra("com.login.username", username);
+		progressbar.dismiss();
 		startActivity(intent);
 	}
 	
@@ -201,7 +226,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 								Main.logged_user = username;
 								//close the editor
 								spedit.commit();
-								Log.i("pratik","before toast");
+								Log.i(TAG,"before toast");
 								//display toast
 								//Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT).show();
 								result = 0;
@@ -229,18 +254,26 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 
 			protected void onPostExecute(Long result)
 			{
+				progressbar.dismiss();
 				switch(result.intValue()) {
 				case 0:
-					Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT).show();
+					Toast toast = Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					Main.isLogin = true;
 					callHome();
 					break;
 				case 1:
-					Toast.makeText(getBaseContext(), "Invalid username and/or password", Toast.LENGTH_SHORT).show();
+					toast =Toast.makeText(getBaseContext(), "Invalid username and/or password", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					Main.isLogin = false;
+					etPass.setText("");
 					break;
 				case 2:
-					Toast.makeText(getBaseContext(), "Cannot connect to server !", Toast.LENGTH_SHORT).show();
+					toast = Toast.makeText(getBaseContext(), "Cannot connect to server !", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					Main.isLogin = false;
 					break;
 				}
@@ -265,4 +298,27 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 			startActivity(intent);
 		}
 		
+		public static String md5hash(String message){
+	        String digest = null;
+	        try {
+	            MessageDigest md = MessageDigest.getInstance("MD5");
+	            byte[] hash = md.digest(message.getBytes("UTF-8"));
+	           
+	           
+	            //converting byte array to Hexadecimal String
+	           StringBuilder sb = new StringBuilder(2*hash.length);
+	           for(byte b : hash){
+	               sb.append(String.format("%02x", b&0xff));
+	           }
+	          
+	           digest = sb.toString();
+	          
+	        } catch (UnsupportedEncodingException ex) {
+	            Log.i(TAG,"UnsupportedEncodingException "+ex.toString());
+	        } catch (NoSuchAlgorithmException ex) {
+	            Log.i(TAG,"NoSuchAlgorithmException "+ex.toString());
+	        }
+	        return digest;
+	    }
+	
 }

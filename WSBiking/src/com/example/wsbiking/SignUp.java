@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
@@ -19,8 +22,11 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,6 +56,8 @@ public class SignUp extends Activity implements OnClickListener {
 	HttpResponse response;
 	HttpEntity entity;
 	
+	ProgressDialog progressbar;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,6 +67,8 @@ public class SignUp extends Activity implements OnClickListener {
 		password = (EditText) findViewById(R.id.password);
 		cpassword = (EditText) findViewById(R.id.cpassword);
 		signup = (ImageView) findViewById(R.id.signup);
+		
+		progressbar = new ProgressDialog(SignUp.this);
 		
 		signup.setOnClickListener(this);
 		
@@ -86,13 +96,28 @@ public class SignUp extends Activity implements OnClickListener {
 		cpasswd = cpassword.getText().toString();
 		
 		if(uname.isEmpty() || passwd.isEmpty() || cpasswd.isEmpty()) {
-			Toast.makeText(getBaseContext(), "Fields cannot be empty !", Toast.LENGTH_SHORT).show();
+			Toast toast = Toast.makeText(getBaseContext(), "Fields cannot be empty !", Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+			toast.show();
 		}
 		else {
 			if(passwd.equals(cpasswd)) {
+				
+				uname = md5hash(uname);
+				passwd = md5hash(passwd);
+				
+				Log.i(TAG,"signup else "+uname+" "+passwd);
+				
+				progressbar.setTitle("Please Wait");
+				progressbar.setMessage("Connecting to server...");
+				progressbar.show();
 				new longOperation().execute("");
+				//progressbar.dismiss();
+				
 			} else {
-				Toast.makeText(getBaseContext(), "Passwords do not match !", Toast.LENGTH_SHORT).show();
+				Toast toast = Toast.makeText(getBaseContext(), "Passwords do not match !", Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+				toast.show();
 				password.setText("");
 				cpassword.setText("");
 			}
@@ -116,6 +141,7 @@ public class SignUp extends Activity implements OnClickListener {
 					nameValuePairs.add(new BasicNameValuePair("uname", uname));
 					nameValuePairs.add(new BasicNameValuePair("passwd", passwd));
 					
+					Log.i(TAG,"signup else "+uname+" "+passwd);
 					Log.i(TAG,"inside try");
 					//add array to http post
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -147,7 +173,7 @@ public class SignUp extends Activity implements OnClickListener {
 							//assign json responses to local var
 							if(jsonresponse.has("ERROR")) {
 								String error = jsonresponse.getString("ERROR");
-								Log.i("pratik", error.toString());	
+								Log.i(TAG, error.toString());	
 								if(error.contains("Duplicate")) {
 									result = 3;
 								}
@@ -156,6 +182,8 @@ public class SignUp extends Activity implements OnClickListener {
 								String retUser = jsonresponse.getString("user"); //mysql field
 								String retPass = jsonresponse.getString("pass");
 							
+								Log.i(TAG,"Json else "+retUser+" "+retPass);
+								
 								//validate login credentials
 								if(uname.equals(retUser) && passwd.equals(retPass)) {
 									result = 0;
@@ -182,6 +210,7 @@ public class SignUp extends Activity implements OnClickListener {
 
 			protected void onPostExecute(Long result)
 			{
+				progressbar.dismiss();
 				switch(result.intValue()) {
 				case 0:
 					Toast.makeText(getBaseContext(), "SignUp successful. Please login", Toast.LENGTH_SHORT).show();
@@ -234,6 +263,28 @@ public class SignUp extends Activity implements OnClickListener {
 	        return sb.toString();
 	    }//End of convertStreamToString
 	 
+		public static String md5hash(String message){
+	        String digest = null;
+	        try {
+	            MessageDigest md = MessageDigest.getInstance("MD5");
+	            byte[] hash = md.digest(message.getBytes("UTF-8"));
+	           
+	           
+	            //converting byte array to Hexadecimal String
+	           StringBuilder sb = new StringBuilder(2*hash.length);
+	           for(byte b : hash){
+	               sb.append(String.format("%02x", b&0xff));
+	           }
+	          
+	           digest = sb.toString();
+	          
+	        } catch (UnsupportedEncodingException ex) {
+	            Log.i(TAG,"UnsupportedEncodingException "+ex.toString());
+	        } catch (NoSuchAlgorithmException ex) {
+	            Log.i(TAG,"NoSuchAlgorithmException "+ex.toString());
+	        }
+	        return digest;
+	    }
 	/*	@Override
 		public void onBackPressed() {
 			Main.isLogin = false;
