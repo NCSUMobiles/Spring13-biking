@@ -202,7 +202,7 @@ public class SignUp extends Activity implements OnClickListener {
 					
 				} catch(Exception e) {
 					Log.i(TAG,e.toString());
-					if(e.toString().contains("HttpHostConnectException")) {
+					if(e.toString().contains("HttpHostConnectException") || e.toString().contains("HostException")) {
 						result = 2;
 					}
 
@@ -215,17 +215,25 @@ public class SignUp extends Activity implements OnClickListener {
 				progressbar.dismiss();
 				switch(result.intValue()) {
 				case 0:
-					Toast.makeText(getBaseContext(), "SignUp successful. Please login", Toast.LENGTH_SHORT).show();
+					Toast toast = Toast.makeText(getBaseContext(), "SignUp successful. Please login", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					callMain();
 					break;
 				case 1:
-					Toast.makeText(getBaseContext(), "Something went wrong! Please enter again", Toast.LENGTH_SHORT).show();
+					toast = Toast.makeText(getBaseContext(), "Something went wrong! Please enter again", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					break;
 				case 2:
-					Toast.makeText(getBaseContext(), "Cannot connect to server !", Toast.LENGTH_SHORT).show();
+					toast = Toast.makeText(getBaseContext(), "Cannot connect to server! Please check network connectivity", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					break;
 				case 3:
-					Toast.makeText(getBaseContext(), "Username already exists! Please choose a different one", Toast.LENGTH_SHORT).show();
+					toast =Toast.makeText(getBaseContext(), "Username already exists! Please choose a different one", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+					toast.show();
 					break;
 				}
 				

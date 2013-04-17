@@ -60,13 +60,16 @@ public class Main extends Activity {
 		Session session = Session.getActiveSession();
         if (session == null) {
             if (savedInstanceState != null) {
+            	Log.i(TAG,"in if session not null");
                 session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
             }
             if (session == null) {
+            	Log.i(TAG,"in if session null");
                 session = new Session(this);
             }
             Session.setActiveSession(session);
             if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+            	Log.i(TAG,"in if session create token loaded");
                 session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
             }
         }
@@ -137,9 +140,11 @@ public class Main extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG,"in on activity result");
         Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
         Session session1 = Session.getActiveSession();
         if (session1.isOpened()) {
+        	Log.i(TAG,"in on activity result session opened");
         	callHome();
         }
     }
@@ -149,11 +154,13 @@ public class Main extends Activity {
         super.onSaveInstanceState(outState);
         Session session = Session.getActiveSession();
         Session.saveSession(session, outState);
+        Log.i(TAG,"in on save instance state");
     }
     
     private class SessionStatusCallback implements Session.StatusCallback {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
+        	Log.i(TAG,"in session status callback");
             updateView();
         }
     }

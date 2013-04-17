@@ -244,7 +244,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 					
 				} catch(Exception e) {
 					Log.i(TAG,e.toString());
-					if(e.toString().contains("HttpHostConnectException")) {
+					if(e.toString().contains("HttpHostConnectException") || e.toString().contains("HostException")) {
 						result = 2;
 					}
 					if(e.toString().contains("End of input at")) {
@@ -273,7 +273,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 					etPass.setText("");
 					break;
 				case 2:
-					toast = Toast.makeText(getBaseContext(), "Cannot connect to server !", Toast.LENGTH_SHORT);
+					toast = Toast.makeText(getBaseContext(), "Cannot connect to server! Please check network connectivity", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
 					toast.show();
 					Main.isLogin = false;
