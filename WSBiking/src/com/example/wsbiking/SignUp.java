@@ -231,9 +231,10 @@ public class SignUp extends Activity implements OnClickListener {
 					toast.show();
 					break;
 				case 3:
-					toast =Toast.makeText(getBaseContext(), "Username already exists! Please choose a different one", Toast.LENGTH_SHORT);
+					toast =Toast.makeText(getBaseContext(), "Username "+ username.getText()+" already exists! Please choose a different one", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
 					toast.show();
+					username.setText("");
 					break;
 				}
 				

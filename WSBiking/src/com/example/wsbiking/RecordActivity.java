@@ -153,24 +153,7 @@ public class RecordActivity extends FragmentActivity implements
 
 			break;
 		case R.id.logout_item:
-			if (Main.isLogin) {
-				Main.isLogin = false;
-				SharedPreferences sp = getSharedPreferences("logindetails", 0);
-				SharedPreferences.Editor spedit = sp.edit();
-				spedit.clear();
-				spedit.commit();
-			}
-			else {
-				Session session = Session.getActiveSession();
-				if (!session.isClosed()) {
-					Log.i(TAG, "in isClosed");
-					session.closeAndClearTokenInformation();
-				}
-			}
-			Intent logout = new Intent(this, Main.class);
-			logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
-			startActivity(logout);
-			
+			userLogout();
 			break;
 		case R.id.weather:
 			displayWeather();
@@ -741,5 +724,37 @@ public class RecordActivity extends FragmentActivity implements
 
 				});
 		request.executeAsync();
+	}
+	
+	public void userLogout()
+	{
+		if (Main.isLogin) {
+			Main.isLogin = false;
+			SharedPreferences sp = getSharedPreferences("logindetails", 0);
+			SharedPreferences.Editor spedit = sp.edit();
+			spedit.clear();
+			spedit.commit();
+		}
+		else {
+			Session session = Session.getActiveSession();
+			if (!session.isClosed()) {
+				Log.i(TAG, "in isClosed");
+				session.closeAndClearTokenInformation();
+			}
+		}
+		Intent logout = new Intent(this, Main.class);
+		//logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
+		logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		Toast toast = Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+		toast.show();
+		
+		startActivity(logout);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		
+		userLogout();
 	}
 }

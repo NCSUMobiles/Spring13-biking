@@ -172,11 +172,4 @@ public class Main extends Activity {
 		startActivity(intent);
 	}
 	
-	@Override
-	public void onBackPressed() {
-		
-		//onClickLogout();
-		finish();
-	}
-	
 }
