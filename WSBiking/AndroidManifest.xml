@@ -30,7 +30,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/bike"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <meta-data
@@ -48,7 +48,8 @@
         </activity>
         <activity
             android:name="com.example.wsbiking.ViewRoutes"
-            android:label="@string/title_activity_view_routes" >
+            android:label="@string/title_activity_view_routes" 
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.example.wsbiking.ShowRoute"
@@ -84,11 +85,13 @@
         </activity>
         <activity
             android:name="com.example.wsbiking.NormalLogin"
-            android:label="@string/title_activity_normal_login" >
+            android:label="@string/title_activity_normal_login" 
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.example.wsbiking.SignUp"
-            android:label="@string/title_activity_sign_up" >
+            android:label="@string/title_activity_sign_up" 
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.example.wsbiking.Heatmap"
