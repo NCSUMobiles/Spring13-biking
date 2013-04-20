@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<publishData>
+  <publishProfile publishUrl="http://localhost:2000/" deleteExistingFiles="False" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="Profile1" publishMethod="FileSystem" replaceMatchingFiles="True" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
+    <file relUrl="bin/BackEndDraft.pdb" publishTime="04/06/2013 21:44:06" />
+    <file relUrl="Service1.svc" publishTime="04/05/2013 14:08:39" />
+    <file relUrl="bin/BackEndDraft.dll" publishTime="04/06/2013 21:44:06" />
+    <file relUrl="Web.config" publishTime="04/05/2013 15:40:27" />
+  </publishProfile>
+</publishData>
