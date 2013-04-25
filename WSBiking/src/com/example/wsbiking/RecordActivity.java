@@ -150,7 +150,6 @@ public class RecordActivity extends FragmentActivity implements
 		case R.id.action_routes:
 			Intent intent = new Intent(this, ViewRoutes.class);
 			startActivity(intent);
-
 			break;
 		case R.id.logout_item:
 			userLogout();
@@ -318,7 +317,7 @@ public class RecordActivity extends FragmentActivity implements
 
 		if (loadingWeather.getVisibility() == View.INVISIBLE) {
 			if (weatherList.isShown()) {
-				weatherList.setVisibility(View.INVISIBLE);		
+				weatherList.setVisibility(View.INVISIBLE);
 			} else {
 				String latlong[] = { "35.7719", "-78.6389" };
 
@@ -451,10 +450,10 @@ public class RecordActivity extends FragmentActivity implements
 		} catch (Exception ex) {
 			Log.e(LOG_TAB, ex.getMessage());
 		}
-		Log.i(TAG,"text button is "+LoggedUser.getText());
+		Log.i(TAG, "text button is " + LoggedUser.getText());
 		Main.logged_user = LoggedUser.getText().toString();
-		Log.i(TAG,"string in main is "+Main.logged_user);
-		
+		Log.i(TAG, "string in main is " + Main.logged_user);
+
 		if (gps_enabled) {
 
 			startTime = new Date();
@@ -725,17 +724,15 @@ public class RecordActivity extends FragmentActivity implements
 				});
 		request.executeAsync();
 	}
-	
-	public void userLogout()
-	{
+
+	public void userLogout() {
 		if (Main.isLogin) {
 			Main.isLogin = false;
 			SharedPreferences sp = getSharedPreferences("logindetails", 0);
 			SharedPreferences.Editor spedit = sp.edit();
 			spedit.clear();
 			spedit.commit();
-		}
-		else {
+		} else {
 			Session session = Session.getActiveSession();
 			if (!session.isClosed()) {
 				Log.i(TAG, "in isClosed");
@@ -743,18 +740,19 @@ public class RecordActivity extends FragmentActivity implements
 			}
 		}
 		Intent logout = new Intent(this, Main.class);
-		//logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
+		// logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
 		logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		Toast toast = Toast.makeText(getBaseContext(), "You have been logged out", Toast.LENGTH_SHORT);
-		toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+		Toast toast = Toast.makeText(getBaseContext(),
+				"You have been logged out", Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
 		toast.show();
-		
+
 		startActivity(logout);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		
+
 		userLogout();
 	}
 }

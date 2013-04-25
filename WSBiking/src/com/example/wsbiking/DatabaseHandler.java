@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -65,6 +66,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	private static final String LATITUDE = "latitude";
 	private static final String LONGITUDE = "longitude";
 
+	// Route points table column indexes
+	private static final Integer LATITUDEINDEX = 0;
+	private static final Integer LONGITUDEINDEX = 1;
+
 	/**
 	 * @return instance.
 	 */
@@ -110,7 +115,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				+ ROUTEID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME
 				+ " TEXT," + DESCRIPTION + " TEXT," + AVGSPEED + " REAL,"
 				+ DISTANCE + " REAL," + STARTTIME + " TEXT," + ENDTIME
-				+ " TEXT," +USERID+" TEXT,"+ ISINSYNC + " INTEGER); ";
+				+ " TEXT," + USERID + " TEXT," + ISINSYNC + " INTEGER); ";
 
 		String CREATE_ROUTE_POINTS_TABLE = "CREATE TABLE " + TABLE_ROUTE_POINTS
 				+ "(" + ROUTEID + " INTEGER," + LATITUDE + " REAL," + LONGITUDE
@@ -145,7 +150,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	//TODO: TEST code to alter table, remove later
+	// TODO: TEST code to alter table, remove later
 	/**
 	 * Update routes table to add user name and sync column
 	 * 
@@ -190,6 +195,101 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 					"Failed to delete route (Phantom route without route points): "
 							+ ex.getMessage());
 		}
+	}
+
+	/**
+	 * Updated routes as synced with server
+	 * @param routes
+	 */
+	public void markRoutesSynced(int[] routes) {
+		StringBuilder routeIDs = new StringBuilder();
+
+		try {
+
+			for (int counter = 0; counter < routes.length; counter++) {
+				routeIDs.append(routes[counter]).append(",");
+			}
+
+			String UPDATE_TABLE = "UPDATE " + TABLE_ROUTES + " SET " + ISINSYNC
+					+ "=0 WHERE " + ROUTEID + " IN("
+					+ routeIDs.substring(0, routeIDs.length() - 1) + ")";
+
+			SQLiteDatabase db = this.getWritableDatabase();
+			db.execSQL(UPDATE_TABLE);
+
+		} catch (Exception ex) {
+			Log.e(LOG_TAG,
+					"Failed to mark routes as synced: " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Get all unsynced routes
+	 * 
+	 * @return
+	 */
+	public ArrayList<Route> getUnsyncedRoutes() {
+		ArrayList<Route> routes = null;
+		Cursor cursor;
+
+		try {
+			SQLiteDatabase db = this.getWritableDatabase();
+
+			cursor = db.query(TABLE_ROUTES,
+					new String[] { ROUTEID, NAME, DESCRIPTION, AVGSPEED,
+							DISTANCE, STARTTIME, ENDTIME, USERID }, ISINSYNC
+							+ "= ?", new String[] { "0" }, null, null, null);
+
+			if (cursor.moveToFirst()) {
+
+				routes = new ArrayList<Route>();
+				ArrayList<RoutePoint> points = null;
+				Cursor pointsCursor;
+				Integer routeID;
+				String routeName, routeDesc, routeStart, routeEnd, userName;
+
+				float routeSpeed, routeDistance;
+
+				while (!cursor.isAfterLast()) {
+
+					routeID = cursor.getInt(ROUTEIDINDEX);
+					routeName = cursor.getString(NAMEINDEX);
+					routeDesc = cursor.getString(DESCRIPTIONINDEX);
+					routeSpeed = cursor.getFloat(AVGSPEEDINDEX);
+					routeDistance = cursor.getFloat(DISTANCEINDEX);
+					routeStart = cursor.getString(STARTTIMEINDEX);
+					routeEnd = cursor.getString(ENDTIMEINDEX);
+					userName = cursor.getString(USERIDINDEX);
+
+					pointsCursor = this.getRoutePoints(routeID);
+
+					if (pointsCursor != null && pointsCursor.moveToFirst()) {
+
+						points = new ArrayList<RoutePoint>();
+
+						while (!pointsCursor.isAfterLast()) {
+							points.add(new RoutePoint(pointsCursor
+									.getDouble(LATITUDEINDEX), pointsCursor
+									.getDouble(LONGITUDEINDEX)));
+							pointsCursor.moveToNext();
+						}
+
+						routes.add(new Route(points, routeID, routeName,
+								routeDesc, routeSpeed, routeDistance,
+								routeStart, routeEnd, userName));
+					}
+
+					cursor.moveToNext();
+				}
+			}
+
+			cursor.close();
+
+		} catch (Exception ex) {
+			Log.e(LOG_TAG, "FAield to get unsynced routes: " + ex.getMessage());
+		}
+
+		return routes;
 	}
 
 	// Create a new route entry

@@ -58,6 +58,10 @@ public class Route implements Parcelable {
 	public Integer getID() {
 		return this.ID;
 	}
+	
+	public void setID(Integer ID) {
+		this.ID = ID;
+	}
 
 	public String getTitle() {
 		return this.title;
