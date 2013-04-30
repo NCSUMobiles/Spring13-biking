@@ -60,12 +60,6 @@ public class RouteSave extends Activity {
 			routeTitle = this.startTime.toString() + " "
 					+ this.endtime.toString();
 		
-		for(double i = 0; i < 2 ; i++)
-		{
-			this.routePoints.add(new RoutePoint(i,i+1));
-			
-		}
-
 		Route route = new Route(this.routePoints, null, routeTitle, routeDesc,
 				this.avgSpeed, this.totalDistance, this.startTime,
 				this.endtime, Main.logged_user);
