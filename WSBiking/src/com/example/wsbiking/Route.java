@@ -55,6 +55,10 @@ public class Route implements Parcelable {
 		userID = source.readString();
 	}
 
+	public Route() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public Integer getID() {
 		return this.ID;
 	}
@@ -94,6 +98,20 @@ public class Route implements Parcelable {
 	public ArrayList<RoutePoint> getPoints() {
 		return this.points;
 	}
+	
+	public String getPointsJSON() {
+	       
+        StringBuilder pointsJSON = new StringBuilder("[");
+        String OBJECTSTRING = "{'latitude': %s, 'longitude': %s},";
+
+        for (RoutePoint point : this.points) {
+            pointsJSON.append(String.format(OBJECTSTRING, point.getLatitude(),
+                    point.getLongitude()));
+        }
+       
+        return pointsJSON.substring(0, pointsJSON.length() - 1) + "]";
+	}
+	
 
 	@Override
 	public int describeContents() {

@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.HttpEntity;
@@ -58,7 +59,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 	
 	//create htpp response and entity
 	HttpResponse response;
-	HttpEntity entity;
+	HttpEntity httpentity;
 	
 	ProgressDialog progressbar;
 
@@ -169,7 +170,13 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 			protected Long doInBackground(String... params) {
 				// TODO Auto-generated method stub
 				long result = -1;
+				
+				//HttpPost request = new HttpPost("http://152.46.16.223:2001/BikingService/Service1.svc/login");
+				
+				//request.setHeader("Content-type", "text/plain");  
 				try {
+					
+					JSONObject loginJSON = new JSONObject();
 					
 					//create new arraylist
 					nameValuePairs = new ArrayList<NameValuePair>();
@@ -178,12 +185,23 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 					nameValuePairs.add(new BasicNameValuePair("username", username));
 					nameValuePairs.add(new BasicNameValuePair("password", password));
 					
+					//loginJSON.put("username",username);
+					//loginJSON.put("password",password);
+					
 					Log.i(TAG,"inside try");
 					//add array to http post
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 					
+					StringEntity entity = new StringEntity(loginJSON.toString());
+					
+					//request.setEntity(entity);
+					
+					
+					
 					Log.i(TAG,"url");
 					//assign executed  from container to response
+					//response = httpclient.execute(request);
+					
 					response = httpclient.execute(httppost);
 					
 					Log.i(TAG,"response");
@@ -195,13 +213,13 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 						
 						
 						//assign response entity to http entity
-						entity = response.getEntity();
+						httpentity = response.getEntity();
 						
 						//check if entity is non null
-						if(entity != null) {
+						if(httpentity != null) {
 							
 							//create a new input stream with received data
-							InputStream instream = entity.getContent();
+							InputStream instream = httpentity.getContent();
 							
 							//create a new json object and assign converted data as params
 							JSONObject jsonresponse = new JSONObject(convertStreamToString(instream));

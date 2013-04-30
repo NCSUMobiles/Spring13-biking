@@ -535,7 +535,7 @@ public class RecordActivity extends FragmentActivity implements
 
 		initializePreRecording(false);
 
-		if (routePoints.size() <= 1) {
+		if (routePoints.size() <= 0) {
 
 			if (startMarker != null) {
 				startMarker.remove();

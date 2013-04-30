@@ -53,16 +53,28 @@ public class RouteSave extends Activity {
 
 		String routeTitle = edtTitle.getText().toString();
 		String routeDesc = edtDesc.getText().toString();
+		
+		HttpHandler httphandle = new HttpHandler();
 
 		if (routeTitle.length() == 0)
 			routeTitle = this.startTime.toString() + " "
 					+ this.endtime.toString();
+		
+		for(double i = 0; i < 2 ; i++)
+		{
+			this.routePoints.add(new RoutePoint(i,i+1));
+			
+		}
 
 		Route route = new Route(this.routePoints, null, routeTitle, routeDesc,
 				this.avgSpeed, this.totalDistance, this.startTime,
 				this.endtime, Main.logged_user);
 
 		int routeID = dbHandler.addRoute(route);
+		
+	    route.setID(routeID);
+	   
+		httphandle.doInBackground();
 
 		// TODO: Server call to save route to server and also send all pending
 		// routes that aren't synced
