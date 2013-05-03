@@ -593,7 +593,7 @@ public class RecordActivity extends FragmentActivity implements
 		initializePreRecording(false);
 		stopJourneyHandler.removeCallbacks(stopJourneyRunnable);
 
-		if (routePoints.size() < 1) {
+		if (routePoints.size() <= 1) {
 
 			if (startMarker != null) {
 				startMarker.remove();
