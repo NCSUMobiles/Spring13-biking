@@ -89,7 +89,9 @@ public class SignUp extends Activity implements OnClickListener {
 		httpclient = new DefaultHttpClient();
 		
 		//create a new http post with url to php file as param
-		httppost = new HttpPost("http://152.46.19.183/android/signup.php");
+		//httppost = new HttpPost("http://152.46.19.183/android/signup.php");
+		//httppost = new HttpPost("http://24.40.139.4:2001/Service1.svc/signup");
+		httppost = new HttpPost("http://152.46.16.223:2001/BikingService/Service1.svc/signup");
 		
 		Log.i(TAG,"connection done");
 		//assign input text to strings
@@ -173,14 +175,11 @@ public class SignUp extends Activity implements OnClickListener {
 							
 
 							//assign json responses to local var
-							if(jsonresponse.has("ERROR")) {
-								String error = jsonresponse.getString("ERROR");
-								Log.i(TAG, error.toString());	
-								if(error.contains("Duplicate")) {
-									result = 3;
-								}
-							} else {
-													
+							String error = jsonresponse.getString("ERROR");
+							Log.i(TAG, error.toString());	
+							if(error.contains("Duplicate")) {
+								result = 3;
+							} else { 
 								String retUser = jsonresponse.getString("user"); //mysql field
 								String retPass = jsonresponse.getString("pass");
 							
