@@ -44,4 +44,14 @@ public class StoreInfo {
 	public Drawable getImg(int i){
 		return img[i];
 	}
+	
+	public String getTempAndCondition()
+	{
+		String weatherCondition;
+		
+		weatherCondition = this.temp[0] + this.condition[0];
+		
+		return weatherCondition;
+		
+	}
 }

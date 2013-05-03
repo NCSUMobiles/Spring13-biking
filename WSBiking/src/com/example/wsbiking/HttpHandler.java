@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import com.example.weather.StoreInfo;
 import com.google.gson.Gson;
 
 
@@ -44,12 +45,16 @@ public class HttpHandler extends AsyncTask <Void, Void, Void>{
 	@SuppressWarnings("null")
 	@Override
 	protected Void doInBackground(Void... params) {
+		
+		int timeoutConnection = 10000, timeoutSocket = 10000; 
+		
+		StoreInfo weatherInfo = new StoreInfo();
 		  
-		//HttpParams httpparams = new BasicHttpParams();
+		HttpParams httpparams = new BasicHttpParams();
 		
-		//HttpConnectionParams.setConnectionTimeout(httpparams, 3000);
+		//HttpConnectionParams.setConnectionTimeout(httpparams, timeoutConnection);
 		
-		//HttpConnectionParams.setSoTimeout(httpparams, 10000);
+		//HttpConnectionParams.setSoTimeout(httpparams, timeoutSocket);
 		
 		HttpResponse response;
 		
@@ -58,14 +63,12 @@ public class HttpHandler extends AsyncTask <Void, Void, Void>{
 		HttpClient httpClient = new DefaultHttpClient();
             
    		//HttpParams httpParameters = null;
-        //JSONObject responses = new JSONObject();
-        
+                
         DatabaseHandler dbHandler = null;
         
         dbHandler = DatabaseHandler.getInstance(null);
         
-   		//int timeoutConnection = 10000, timeoutSocket = 10000;   		
-   		       
+   		 		       
    		ArrayList<Route> routeList = new ArrayList<Route>();
         
         HttpPost request = new HttpPost("http://152.46.16.223:2001/BikingService/Service1.svc/SaveRoute");
@@ -94,8 +97,8 @@ public class HttpHandler extends AsyncTask <Void, Void, Void>{
         	routeJSON.put("speed", tempRoute.getSpeed());
         	routeJSON.put("starttime", tempRoute.getStartTime());
         	routeJSON.put("title", tempRoute.getTitle());
-        	routeJSON.put("username", "rjagird");
-        	routeJSON.put("weatherinfo", "Sunny day!");
+        	routeJSON.put("username", tempRoute.getUserID());
+        	routeJSON.put("weatherinfo", weatherInfo.getTempAndCondition());
         	routeJSON.put("pointCollection", new JSONArray(tempRoute.getPointsJSON()));
 
         	jsonarray.put(routeJSON);

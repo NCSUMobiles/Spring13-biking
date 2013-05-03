@@ -232,6 +232,12 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 							if(username.equals(retUser) && password.equals(retPass)) {
 							//if(username.equals("pratik") && password.equals("qwerty")) {
 								
+								
+								//TO DO send unsynced routes while login
+								HttpHandler httphandle = new HttpHandler();
+								
+								//httphandle.doInBackground();
+								
 								//create a new shared preference  by getting the preference
 								//give the shared preference nay name you like
 								SharedPreferences sp = getSharedPreferences("logindetails", 0);
