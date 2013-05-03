@@ -26,6 +26,7 @@ public class RouteSave extends Activity {
 	private ArrayList<RoutePoint> routePoints;
 	private float totalDistance, avgSpeed;
 	private String startTime, endtime;
+	private String weatherInfo;
 	private DatabaseHandler dbHandler = null;
 
 	// Handler to Hide after some seconds
@@ -60,7 +61,6 @@ public class RouteSave extends Activity {
 			routeTitle = this.startTime.toString() + " "
 					+ this.endtime.toString();
 
-
 		Route route = new Route(this.routePoints, null, routeTitle, routeDesc,
 				this.avgSpeed, this.totalDistance, this.startTime,
 				this.endtime, Main.logged_user);
@@ -69,7 +69,7 @@ public class RouteSave extends Activity {
 		
 	    route.setID(routeID);
 	   
-		httphandle.doInBackground();
+		httphandle.doInBackground(this.weatherInfo);
 
 		// TODO: Server call to save route to server and also send all pending
 		// routes that aren't synced
@@ -97,6 +97,7 @@ public class RouteSave extends Activity {
 		this.avgSpeed = recordActivity.getFloatExtra("avgSpeed", 0);
 		this.startTime = recordActivity.getStringExtra("startTime");
 		this.endtime = recordActivity.getStringExtra("endTime");
+		this.weatherInfo = recordActivity.getStringExtra("weatherInfo");
 
 		EditText edtTitle = (EditText) findViewById(R.id.edtTxTitle);
 		EditText edtDesc = (EditText) findViewById(R.id.edtTxtDesc);

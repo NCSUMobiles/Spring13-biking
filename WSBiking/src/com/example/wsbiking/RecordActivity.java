@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,7 +27,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +76,7 @@ public class RecordActivity extends FragmentActivity implements
 	private static final int ROUTECOLOR = 0x7F0000FF;
 	private static final String LOG_TAB = "Record activity";
 	private static final int SECS = 5;
+	private static final int TIMEOUT_MINS = 180 * 60 * 1000;
 	private static final String TAG = "RECORD";
 
 	/**
@@ -100,7 +99,7 @@ public class RecordActivity extends FragmentActivity implements
 	private ArrayList<RoutePoint> routePoints;
 
 	private float totalDistance;
-	private Location lastLocation;
+	private Location lastLocation, lastUserLocation = null;
 	private Date startTime;
 
 	private DatabaseHandler dbHandler;
@@ -108,14 +107,25 @@ public class RecordActivity extends FragmentActivity implements
 
 	private EditText LoggedUser;
 	private Session session;
+	private StoreInfo currentWeather = null;
 
 	// Handler to Hide Weather popup after some seconds
-	final Handler handler = new Handler();
-	final Runnable runnable = new Runnable() {
+	final Handler weatherHandler = new Handler();
+	final Runnable weatherRunnable = new Runnable() {
 		@Override
 		public void run() {
-			handler.removeCallbacks(runnable);
+			weatherHandler.removeCallbacks(weatherRunnable);
 			displayWeather();
+		}
+	};
+
+	// Handler to Hide Weather popup after some seconds
+	final Handler stopJourneyHandler = new Handler();
+	final Runnable stopJourneyRunnable = new Runnable() {
+		@Override
+		public void run() {
+			stopJourneyHandler.removeCallbacks(stopJourneyRunnable);
+			stopRecording(null);
 		}
 	};
 
@@ -273,6 +283,7 @@ public class RecordActivity extends FragmentActivity implements
 		}
 
 		plotMyLocation(null);
+		setWeatherInfo();
 	}
 
 	/* Weather functions START */
@@ -283,7 +294,7 @@ public class RecordActivity extends FragmentActivity implements
 		ArrayList<StoreInfo> weather = new ArrayList<StoreInfo>();
 		if (storeInfo != null) {
 
-			handler.removeCallbacks(runnable);
+			weatherHandler.removeCallbacks(weatherRunnable);
 
 			for (int i = 0; i < 5; i++) {
 				StoreInfo temp = new StoreInfo();
@@ -304,28 +315,64 @@ public class RecordActivity extends FragmentActivity implements
 
 			weatherList.setVisibility(View.VISIBLE);
 
-			handler.postDelayed(runnable, SECS * 1000);
+			weatherHandler.postDelayed(weatherRunnable, SECS * 1000);
 		} else {
 
 		}
 
 	}
 
+	public void wetherDataSet(StoreInfo storeInfo) {
+		this.currentWeather = storeInfo;
+	}
+
+	public void setWeatherInfo() {
+		Location userLocation = lastUserLocation;
+
+		if (userLocation == null) {
+			userLocation = locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		}
+
+		if (userLocation != null) {
+			String latlong[] = { String.valueOf(userLocation.getLatitude()),
+					String.valueOf(userLocation.getLongitude()) };
+
+			WeatherProcessing weatherProcessor = new WeatherProcessing();
+			weatherProcessor.queryYahooWeather(getApplicationContext(),
+					latlong, false, this);
+		}
+	}
+
 	public void displayWeather() {
-		ListView weatherList = (ListView) findViewById(R.id.weatherList);
-		ProgressBar loadingWeather = (ProgressBar) findViewById(R.id.progressBarWeather);
 
-		if (loadingWeather.getVisibility() == View.INVISIBLE) {
-			if (weatherList.isShown()) {
-				weatherList.setVisibility(View.INVISIBLE);
-			} else {
-				String latlong[] = { "35.7719", "-78.6389" };
+		Location userLocation = lastUserLocation;
 
-				loadingWeather.setVisibility(View.VISIBLE);
-				WeatherProcessing weatherProcessor = new WeatherProcessing();
-				weatherProcessor.queryYahooWeather(getApplicationContext(),
-						latlong, this);
+		if (userLocation == null) {
+			userLocation = locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		}
+
+		if (userLocation != null) {
+			ListView weatherList = (ListView) findViewById(R.id.weatherList);
+			ProgressBar loadingWeather = (ProgressBar) findViewById(R.id.progressBarWeather);
+
+			if (loadingWeather.getVisibility() == View.INVISIBLE) {
+				if (weatherList.isShown()) {
+					weatherList.setVisibility(View.INVISIBLE);
+				} else {
+					String latlong[] = {
+							String.valueOf(userLocation.getLatitude()),
+							String.valueOf(userLocation.getLongitude()) };
+
+					loadingWeather.setVisibility(View.VISIBLE);
+					WeatherProcessing weatherProcessor = new WeatherProcessing();
+					weatherProcessor.queryYahooWeather(getApplicationContext(),
+							latlong, true, this);
+				}
 			}
+		} else {
+			showToast("Unable to get user location for local weather");
 		}
 	}
 
@@ -376,6 +423,9 @@ public class RecordActivity extends FragmentActivity implements
 	 * @param location
 	 */
 	public void trackMyLocation(Location currentLocation) {
+
+		if (currentLocation != null)
+			lastUserLocation = currentLocation;
 
 		if (recordingListening) {
 			myLocationListening = false;
@@ -434,6 +484,9 @@ public class RecordActivity extends FragmentActivity implements
 
 			routePoints.add(new RoutePoint(currentLocation.getLatitude(),
 					currentLocation.getLongitude()));
+
+			stopJourneyHandler.removeCallbacks(stopJourneyRunnable);
+			stopJourneyHandler.postDelayed(stopJourneyRunnable, TIMEOUT_MINS);
 		}
 	}
 
@@ -450,6 +503,7 @@ public class RecordActivity extends FragmentActivity implements
 		} catch (Exception ex) {
 			Log.e(LOG_TAB, ex.getMessage());
 		}
+
 		Log.i(TAG, "text button is " + LoggedUser.getText());
 		Main.logged_user = LoggedUser.getText().toString();
 		Log.i(TAG, "string in main is " + Main.logged_user);
@@ -514,6 +568,9 @@ public class RecordActivity extends FragmentActivity implements
 					resourceHandler.getInteger(R.integer.min_distance),
 					locationListener);
 
+			stopJourneyHandler.removeCallbacks(stopJourneyRunnable);
+			stopJourneyHandler.postDelayed(stopJourneyRunnable, TIMEOUT_MINS);
+
 			distance.setText(INITIAL_DISTANCE);
 			timer.setVisibility(View.VISIBLE);
 			distance.setVisibility(View.VISIBLE);
@@ -534,10 +591,9 @@ public class RecordActivity extends FragmentActivity implements
 	public void stopRecording(View btnStop) {
 
 		initializePreRecording(false);
+		stopJourneyHandler.removeCallbacks(stopJourneyRunnable);
 
-		//TO DO setting routePoints to 0
-		
-		if (routePoints.size() <= 1) {
+		if (routePoints.size() < 1) {
 
 			if (startMarker != null) {
 				startMarker.remove();
@@ -566,6 +622,13 @@ public class RecordActivity extends FragmentActivity implements
 			intent.putExtra("startTime", dateFormatter.format(startTime));
 			intent.putExtra("endTime", dateFormatter.format(endTime));
 			intent.putExtra("avgSpeed", calculateSpeed(endTime));
+
+			if (this.currentWeather != null)
+				intent.putExtra("weatherInfo",
+						this.currentWeather.getCondition(0)
+								+ this.currentWeather.getTemp(0));
+			else
+				intent.putExtra("weatherInfo", "No weather info");
 
 			startActivity(intent);
 		}
@@ -744,17 +807,13 @@ public class RecordActivity extends FragmentActivity implements
 		Intent logout = new Intent(this, Main.class);
 		// logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_HISTORY);
 		logout.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		Toast toast = Toast.makeText(getBaseContext(),
-				"You have been logged out", Toast.LENGTH_SHORT);
-		toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
-		toast.show();
+		showToast("You have been logged out");
 
 		startActivity(logout);
 	}
 
 	@Override
 	public void onBackPressed() {
-
 		userLogout();
 	}
 }

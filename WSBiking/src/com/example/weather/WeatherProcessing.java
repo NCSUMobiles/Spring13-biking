@@ -29,24 +29,28 @@ import android.widget.Toast;
 
 public class WeatherProcessing {
 	private WeatherInfoListener weatherInfoListener;
+	private boolean callFlag;
 
-	public void queryYahooWeather(Context context, String[] latLong, WeatherInfoListener result) {
+	public void queryYahooWeather(Context context, String[] latLong,
+			boolean flag, WeatherInfoListener result) {
 		weatherInfoListener = result;
+		callFlag = flag;
 		WeatherQueryTask task = new WeatherQueryTask();
 		task.setContext(context);
 		task.execute(latLong);
 	}
 
-	public String getWeather(Context context, String[] latlong){
+	public String getWeather(Context context, String[] latlong) {
 		String qResult = "";
-		String queryString = "http://api.wunderground.com/api/950884302095eee4/hourly/q/" + latlong[0] +"," + latlong[1]+ ".xml";
+		String queryString = "http://api.wunderground.com/api/950884302095eee4/hourly/q/"
+				+ latlong[0] + "," + latlong[1] + ".xml";
 
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(queryString);
 
 		try {
 			HttpEntity httpEntity = httpClient.execute(httpGet).getEntity();
-			
+
 			if (httpEntity != null) {
 				InputStream inputStream = httpEntity.getContent();
 				Reader in = new InputStreamReader(inputStream);
@@ -72,7 +76,7 @@ public class WeatherProcessing {
 
 		return qResult;
 	}
-	
+
 	private Document convertStringToDocument(Context context, String src) {
 		Document dest = null;
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -94,52 +98,56 @@ public class WeatherProcessing {
 
 		return dest;
 	}
-	
-	public StoreInfo parseWeatherInfo(Context context, Document doc){
+
+	public StoreInfo parseWeatherInfo(Context context, Document doc) {
 		StoreInfo storeInfo = new StoreInfo();
 		try {
-			
-			int i =0;
+
+			int i = 0;
 			Node node1, node2;
 			NodeList nodeList;
-			
-			for(i=0; i<5; i++){
+
+			for (i = 0; i < 5; i++) {
 				node1 = doc.getElementsByTagName("forecast").item(i);
 				nodeList = node1.getChildNodes();
 				node2 = nodeList.item(1);
-				storeInfo.setTime(node2.getChildNodes().item(2).getTextContent() + ":" + node2.getChildNodes().item(3).getTextContent(), i); // Time
+				storeInfo.setTime(node2.getChildNodes().item(2)
+						.getTextContent()
+						+ ":" + node2.getChildNodes().item(3).getTextContent(),
+						i); // Time
 				node2 = nodeList.item(3);
-				storeInfo.setTemp(node2.getChildNodes().item(1).getTextContent(), i); //Temperature
+				storeInfo.setTemp(node2.getChildNodes().item(1)
+						.getTextContent(), i); // Temperature
 				node2 = nodeList.item(7);
 				storeInfo.setCondition(node2.getTextContent(), i); // Condition
 				node2 = nodeList.item(11);
-				storeInfo.setImgURL(node2.getTextContent(), i); 
+				storeInfo.setImgURL(node2.getTextContent(), i);
 			}
 		} catch (NullPointerException e) {
 			e.printStackTrace();
-			Toast.makeText(context, "Parse XML failed - Unrecognized Tag", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "Parse XML failed - Unrecognized Tag",
+					Toast.LENGTH_SHORT).show();
 			storeInfo = null;
-		}		
+		}
 		return storeInfo;
 	}
-	
-	private class WeatherQueryTask extends AsyncTask<String, Void, StoreInfo>{
+
+	private class WeatherQueryTask extends AsyncTask<String, Void, StoreInfo> {
 		private Context context;
+
 		public void setContext(Context context) {
-			
-			
-			
 		}
 
 		@Override
 		protected StoreInfo doInBackground(String... latLong) {
-				String weather = getWeather(context, latLong);
-				Document weatherDoc = convertStringToDocument(context, weather);
-				StoreInfo storeInfo = parseWeatherInfo(context, weatherDoc);
-				for(int i=0; i<=4; i++){
+			String weather = getWeather(context, latLong);
+			Document weatherDoc = convertStringToDocument(context, weather);
+			StoreInfo storeInfo = parseWeatherInfo(context, weatherDoc);
+			for (int i = 0; i <= 4; i++) {
 				try {
-					storeInfo.setImg(Drawable.createFromStream(((java.io.InputStream)
-						      new java.net.URL(storeInfo.getImageURL(i)).getContent()), ""), i);
+					storeInfo.setImg(Drawable.createFromStream(
+							((java.io.InputStream) new java.net.URL(storeInfo
+									.getImageURL(i)).getContent()), ""), i);
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -147,16 +155,20 @@ public class WeatherProcessing {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				}
-				return storeInfo;
+			}
+			return storeInfo;
 		}
-		
+
 		@Override
 		protected void onPostExecute(StoreInfo result) {
 			super.onPostExecute(result);
-			weatherInfoListener.gotWeatherInfo(result);
+
+			if (callFlag)
+				weatherInfoListener.gotWeatherInfo(result);
+			else
+				weatherInfoListener.wetherDataSet(result);
 		}
-		
+
 	}
-	
+
 }

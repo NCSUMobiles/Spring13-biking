@@ -4,8 +4,5 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry exported="true" kind="lib" path="E:/Mandar/NCSU/Courses/CSC 591/adt-bundle-windows-x86-20130219/adt-bundle-windows-x86-20130219/google-gson-2.2.2-release/google-gson-2.2.2/gson-2.2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/Mandar/NCSU/Courses/CSC 591/adt-bundle-windows-x86-20130219/adt-bundle-windows-x86-20130219/google-gson-2.2.2-release/google-gson-2.2.2/gson-2.2.2-javadoc.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/Mandar/NCSU/Courses/CSC 591/adt-bundle-windows-x86-20130219/adt-bundle-windows-x86-20130219/google-gson-2.2.2-release/google-gson-2.2.2/gson-2.2.2-sources.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

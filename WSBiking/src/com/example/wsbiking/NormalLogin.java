@@ -97,9 +97,7 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 		
 		//create a new http post with url to php file as param
 		//httppost = new HttpPost("http://10.0.2.2/android/index.php");
-		//httppost = new HttpPost("http://152.46.19.183/android/index.php");
-		httppost = new HttpPost("http://152.46.16.223:2001/BikingService/Service1.svc/login");
-		//httppost = new HttpPost("http://24.40.139.4:2001/Service1.svc/login");
+		httppost = new HttpPost("http://152.46.19.183/android/index.php");
 		Log.i(TAG,"connection done " + httppost.toString());
 				
 		//assign input text to strings
@@ -233,6 +231,12 @@ public class NormalLogin extends Activity implements android.view.View.OnClickLi
 							//validate login credentials
 							if(username.equals(retUser) && password.equals(retPass)) {
 							//if(username.equals("pratik") && password.equals("qwerty")) {
+								
+								
+								//TO DO send unsynced routes while login
+								HttpHandler httphandle = new HttpHandler();
+								
+								//httphandle.doInBackground();
 								
 								//create a new shared preference  by getting the preference
 								//give the shared preference nay name you like

@@ -19,7 +19,7 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <!--
      The following two permissions are not required to use
-     Google Maps Android API v2, but are recommended.
+     Google Maps Android API v2, but are recommended.
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -30,12 +30,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/bike"
+        android:icon="@drawable/appicon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCU0mmSuXW0iwTQIgpTyhIQYqfqO2Bljmw" />
+            android:value="AIzaSyA-J6_v8DDM57mH2K1E4mGE6pzOnt14ep8" />
 
         <activity
             android:name="com.example.wsbiking.RecordActivity"

@@ -211,7 +211,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			}
 
 			String UPDATE_TABLE = "UPDATE " + TABLE_ROUTES + " SET " + ISINSYNC
-					+ "=0 WHERE " + ROUTEID + " IN("
+					+ "=1 WHERE " + ROUTEID + " IN("
 					+ routeIDs.substring(0, routeIDs.length() - 1) + ")";
 
 			SQLiteDatabase db = this.getWritableDatabase();
