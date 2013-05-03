@@ -13,18 +13,27 @@ namespace DatabaseConnectivity
     {
         public static void Main(string[] args)
         {
-            string connectionstring = ConfigurationManager.AppSettings.Get("connectionString");
-            SqlConnection con = new SqlConnection(connectionstring);
-            SqlCommand cmd = con.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM Routes";
-            con.Open();
-            using (SqlDataReader reader = cmd.ExecuteReader())
+            try
             {
-                while (reader.Read())
+                string connectionstring = ConfigurationManager.AppSettings.Get("connectionString");
+                SqlConnection con = new SqlConnection(connectionstring);
+                SqlCommand cmd = con.CreateCommand();
+                cmd.CommandText = @"SELECT * FROM Routes";
+                con.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    Console.WriteLine("{0} {1} {2}",
-                    reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
+                    while (reader.Read())
+                    {
+                        Console.WriteLine("{0} {1} {2}",
+                        reader.GetInt32(0).ToString(), reader.GetInt32(1).ToString(), reader.GetInt32(2).ToString());
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Console.Read();
             }
         }
     }

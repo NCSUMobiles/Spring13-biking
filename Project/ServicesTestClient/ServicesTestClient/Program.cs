@@ -15,10 +15,10 @@ namespace ServicesTestClient
     [DataContract]
     public class RoutePoint
     {
-        [DataMember(IsRequired = true, Order = 1, Name = "latitude")]
+        [DataMember(IsRequired = true, Name = "latitude")]
         public Double latitude;
 
-        [DataMember(IsRequired = true, Order = 2, Name = "longitude")]
+        [DataMember(IsRequired = true, Name = "longitude")]
         public Double longitude;
 
         public RoutePoint(Double longitude, Double latitude)
@@ -31,32 +31,63 @@ namespace ServicesTestClient
     [DataContract]
     public class Route
     {
-        [DataMember(IsRequired = true, Order = 1)]
+        [DataMember(IsRequired = true)]
+        public int routeid;
+
+        [DataMember(IsRequired = true)]
+        public string username;
+
+        [DataMember(IsRequired = true)]
         public string title;
 
-        [DataMember(IsRequired = false, Order = 2)]
+        [DataMember(IsRequired = false)]
         public string description;
 
-        [DataMember(IsRequired = true, Order = 3)]
+        [DataMember(IsRequired = true)]
+        public string starttime;
+
+        [DataMember(IsRequired = true)]
+        public string endtime;
+        
+        [DataMember(IsRequired = true)]
         public float speed;
 
-        [DataMember(IsRequired = true, Order = 4)]
-        public float duration;
-
-        [DataMember(IsRequired = true, Order = 5)]
+        [DataMember(IsRequired = true)]
         public float distance;
 
-        [DataMember(Order = 6)]
+        [DataMember(IsRequired = false)]
+        public string weatherinfo;
+
+        [DataMember]
         public List<RoutePoint> pointCollection;
 
-        public Route(string title, string desc, float speed, float duration, float distance, List<RoutePoint> coll)
+        public Route(int roleid,string title, string desc, float speed, float distance, string weatherinfo, List<RoutePoint> coll)
         {
+            this.routeid = roleid;
+            this.username = "rjagird";
             this.title = title;
             this.description = desc;
             this.speed = speed;
-            this.duration = duration;
+            this.starttime = DateTime.Now.ToString();
+            this.endtime = DateTime.Now.ToString();
             this.distance = distance;
+            this.weatherinfo = weatherinfo;
             this.pointCollection = coll;
+        }
+    }
+
+    [DataContract(Namespace="")]
+    public class RoutesCollection
+    {
+        [DataMember(IsRequired=true)]
+        public List<Route> routeCollection;
+
+        public RoutesCollection(List<Route> coll)
+        {
+            if (coll != null && coll.Count > 0)
+            {
+                this.routeCollection = coll;
+            }
         }
     }
 
@@ -65,34 +96,55 @@ namespace ServicesTestClient
 
     public class Program
     {
-        public static Route getRoute()
+        public static Route getRoute(int roleid)
         {
+            //Double latitude=89.123456789;
+            //Double longitude = -123.123456789;
+
             List<RoutePoint> list = new List<RoutePoint>();
-            for (int i = 1; i < 50; i++)
+            for (int i = 1; i < 1000; i++)
             {
-                list.Add(new RoutePoint(i,i));
-                //list.Add(new RoutePoint(11.0, 11.0));
-                //list.Add(new RoutePoint(12.0, 12.0));
+                //list.Add(new RoutePoint(longitude - i, latitude - i));
+                list.Add(new RoutePoint(90,90));
+                //list.Add(new RoutePoint(i,i));
             }
 
-            Route route=new Route("WAN IP test","Useless",10,20,12,list);
+            Route route=new Route(roleid,"WAN IP test","Useless",10,12,"Cloudy",list);
             return route;
         }
-        public static void Main(string[] args)
+
+        public static RoutesCollection getRoutes()
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://24.163.56.21:2001/Service1.svc/getroutes");
+            List<Route> routes = new List<Route>();
+            for (int i = 1; i <= 2; i++)
+            {
+                Route current = getRoute(i);
+                routes.Add(current);
+            }
+
+            RoutesCollection collection = new RoutesCollection(routes);
+            return collection;
+        }
+
+        public static void Main1(string[] args)
+        {
+            ///getroutepoints
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://24.163.56.21:2001/Service1.svc/SaveRoute");
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://24.40.139.4:2001/Service1.svc/SaveRoute");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://152.46.16.223:2001/BikingService/Service1.svc/SaveRoute");
             request.Method = "POST";
 
-            MemoryStream stream=new MemoryStream();
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(Route));
-            Route route=getRoute();
+            MemoryStream stream = new MemoryStream();
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RoutesCollection));
+            RoutesCollection routes = getRoutes();
 
-            serializer.WriteObject(stream,route);
+            serializer.WriteObject(stream, routes);
 
-            stream.Position=0;
-            StreamReader reader=new StreamReader(stream);
-            string data=reader.ReadToEnd();
+            stream.Position = 0;
+            StreamReader reader = new StreamReader(stream);
+            string data = reader.ReadToEnd();
 
+            //Console.WriteLine(data);
 
 
 

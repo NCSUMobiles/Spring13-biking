@@ -13,35 +13,64 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+/****** Object:  Table [dbo].[Users]    Script Date: 22/04/2013 05:26:42 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Users](
+	[userid] [int] IDENTITY(1,1) PRIMARY KEY,
+	[username] [nvarchar](max) NOT NULL,
+	[password] [nvarchar](max) NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+DROP TABLE ActiveSessions
+CREATE TABLE [dbo].[ActiveSessions](
+	[sessionid] [int] IDENTITY(1,1) PRIMARY KEY,
+	[UserId] [int] FOREIGN KEY REFERENCES Users(userid),
+	[Location][geography] NOT NULL
+)
+
+
 CREATE TABLE [dbo].[Routes](
-	[RouteID] [int] IDENTITY(1,1) PRIMARY KEY,
+	[ID] [int] IDENTITY(1,1) PRIMARY KEY,
+	[RouteID] [int] NOT NULL,
+	[UserId] [int] FOREIGN KEY REFERENCES Users(userid),
 	[Title] [nvarchar](50) NOT NULL,
 	[Description] [nvarchar](max) NULL,
 	[Speed] [float] NOT NULL,
-	[Duration] [float] NOT NULL,
+	[StartTime] [nvarchar](50) NOT NULL,
+	[EndTime] [nvarchar](50) NOT NULL,
 	[Distance] [float] NOT NULL,
-	[Date]	[DateTime] NOT NULL
+	[WeatherInfo]	[nvarchar](max)
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 CREATE TABLE [dbo].[RoutePoints](
-	[RouteID]	[int]	 FOREIGN KEY REFERENCES Routes(RouteID),
+	[RouteID]	[int]	 FOREIGN KEY REFERENCES Routes(ID),
 	[Location]	[Geography] NOT NULL,
 )
 
 CREATE Type dbo.route AS TABLE
 (
+	[RouteID]		[int],
+	[Username]		[nvarchar](max),
 	[Title]			[nvarchar](50),
 	[Description]	[nvarchar](max),
 	[Speed]			[float],
-	[Duration]		[float],
-	[Distance]		[float]
-		
+	[StartTime]		[nvarchar](50),
+	[EndTime]		[nvarchar](50),
+	[Distance]		[float],
+	[WeatherInfo]	[nvarchar](max)
 )
+
+
 
 CREATE Type dbo.routePointsTable AS TABLE
 (
-	[latitude]		[Decimal],
-	[longitude]		[Decimal]
+	[latitude]		decimal(20,10),
+	[longitude]		decimal(20,10)
 )
 
 SELECT *
@@ -49,64 +78,33 @@ FROM sys.types
 WHERE [name] IN ('route', 'routePointsTable');
 GO
 
+DROP Type route;
+Drop Type routePointsTable;
 
-ALTER PROCEDURE dbo.sp_insertRoute 
-	@route route READONLY,
-	@routePoints routePointsTable READONLY
-AS
-BEGIN
-	SET NOCOUNT ON
-	DECLARE @routeID INT;
-
-	BEGIN TRANSACTION
-	BEGIN TRY
-
-		INSERT INTO dbo.Routes
-		SELECT Title,Description,Speed,Duration,Distance, GETDATE() FROM @route
-
-		SET @routeID= SCOPE_IDENTITY();
-
-		INSERT INTO RoutePoints 
-		SELECT @routeID, geography::STGeomFromText((SELECT 'POINT(' + CONVERT(VARCHAR(16),longitude) + ' ' + CONVERT(VARCHAR(16), latitude) + ')'), 4326)
-		FROM @routePoints
-	COMMIT TRANSACTION
-	return 1;
-	END TRY
-	BEGIN CATCH
-	ROLLBACK TRANSACTION;
-    DECLARE @msg NVARCHAR(MAX) = ERROR_MESSAGE();
-    RAISERROR(@msg, 11, 1);
-    return 0;
-	END CATCH
-
-END
-
-DECLARE @newroute as route;
-DECLARE @newroutePoints as routePointsTable;
-DECLARE @retval as int;
-
-INSERT INTO @newroute VALUES( 'My Third Trip','Useless','10.0','20.0','10.0')
-
-INSERT INTO @newroutePoints(latitude,longitude)
-SELECT 10.0,10.0 UNION ALL
-SELECT 11.0,11.0 UNION ALL
-SELECT 12.0,12.0;
-
-EXECUTE @retval= dbo.sp_insertRoute
-	@newroute,@newroutePoints;
-
-SELECT @retval;
 
 select * from Routes;
-select * from RoutePoints;
+SELECT * FROM RoutePoints;
+select count(*) from RoutePoints;
+select * from Users;
 
 Begin tran
 delete from RoutePoints;
 delete from Routes;
 commit;
 
+BEGIN TRAN
+INSERT INTO USER VALUES('','')
+COMMIT
+select * from users;
 
 
 
-
+DROP TABLE Users;
 GO
+
+
+DECLARE @loc geography
+SELECT @loc=Location FROM RoutePoints
+SELECT @loc
+SELECT @loc.Lat as Lat
+SELECT @loc.Long as Long

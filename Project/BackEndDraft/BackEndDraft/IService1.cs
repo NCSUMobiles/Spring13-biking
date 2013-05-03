@@ -22,24 +22,71 @@ namespace BackEndDraft
 
         [OperationContract]
         [WebInvoke(ResponseFormat = WebMessageFormat.Json)]
-        OperationResult getRoutes(Stream body);
+        List<OperationResult> SaveRoute(Stream body);
 
         [OperationContract]
         [WebInvoke(ResponseFormat = WebMessageFormat.Json, RequestFormat = WebMessageFormat.Json)]
         string getRoutesNew(Route route);
 
+        [OperationContract]
+        [WebInvoke(ResponseFormat = WebMessageFormat.Json, RequestFormat = WebMessageFormat.Json)]
+        string getPostData(Stream body);
+
+        [OperationContract]
+        [WebInvoke(ResponseFormat = WebMessageFormat.Json)]
+        User signup(Stream data);
+
+        [OperationContract]
+        [WebInvoke(ResponseFormat = WebMessageFormat.Json)]
+        User login(Stream data);
+
+        [OperationContract]
+        [WebGet(ResponseFormat = WebMessageFormat.Json)]
+        List<RoutePoint> getRoutePoints();
+
+        [OperationContract]
+        [WebInvoke(ResponseFormat = WebMessageFormat.Json)]
+        UserStatus getLocation(Stream data);
+
+
         
         // TODO: Add your service operations here
+    }
+
+    [DataContract(Namespace = "")]
+    public class User
+    {
+        [DataMember(Name = "user")]
+        public string user;
+
+        [DataMember(Name = "pass")]
+        public string pass;
+
+        [DataMember(Name = "ERROR")]
+        public string ERROR;
     }
 
     [DataContract(Namespace="")]
     public class RoutePoint
     {
-        [DataMember(IsRequired=true,Order=1,Name="latitude")]
+        [DataMember(IsRequired=true,Name="latitude")]
         public Double latitude;
 
-        [DataMember(IsRequired = true, Order = 2, Name = "longitude")]
+        [DataMember(IsRequired = true, Name = "longitude")]
         public Double longitude;
+
+
+    }
+
+
+    [DataContract(Namespace = "")]
+    public class UserStatus
+    {
+        [DataMember(IsRequired = true)]
+        public RoutePoint location;
+
+        [DataMember(IsRequired = true, Name = "present")]
+        public bool isPresent;
 
 
     }
@@ -47,35 +94,56 @@ namespace BackEndDraft
     [DataContract(Namespace = "")]
     public class OperationResult
     {
-        [DataMember(Order=1)]
+        [DataMember]
         public bool status;
 
-        [DataMember(Order = 2)]
+        [DataMember]
         public string Message;
+
+        [DataMember(IsRequired = false)]
+        public int routeid;
     }
 
     [DataContract(Namespace="")]
     public class Route
     {
-        [DataMember(IsRequired = true, Order = 1)]
+
+        [DataMember(IsRequired = true)]
+        public int routeid;
+
+        [DataMember(IsRequired = true)]
+        public string username;
+
+        [DataMember(IsRequired = true)]
         public string title;
 
-        [DataMember(IsRequired=false,Order=2)]
+        [DataMember(IsRequired=false)]
         public string description;
 
-        [DataMember(IsRequired=true,Order=3)]
+        [DataMember(IsRequired=true)]
         public float speed;
 
-        [DataMember(IsRequired = true, Order = 4)]
-        public float duration;
+        [DataMember(IsRequired = true)]
+        public string starttime;
 
-        [DataMember(IsRequired = true, Order = 5)]
+        [DataMember(IsRequired = true)]
+        public string endtime;
+
+        [DataMember(IsRequired = true)]
         public float distance;
 
-        [DataMember(Order = 6)]
+        [DataMember(IsRequired = false)]
+        public string weatherinfo;
+
+        [DataMember(IsRequired=true)]
         public List<RoutePoint> pointCollection;
     }
 
 
-    
+    [DataContract(Namespace = "")]
+    public class RoutesCollection
+    {
+        [DataMember(IsRequired = true)]
+        public List<Route> routeCollection;
+    }   
 }
